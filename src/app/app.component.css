@@ -1,0 +1,28 @@
+
+
+#sidebar {
+    background-color:#2a2c36;
+    color:#eee;
+    position:fixed;
+    height:100%;
+    width:150px;
+    overflow:hidden;
+    left:0;
+    transition: left ease .25s;
+  
+  }
+  
+  #sidebar.hide-sidebar {
+    left:-150px;
+    transition: left ease .25s;
+  }
+
+  #mainwrapper {
+    margin:0 0 0 150px;
+   transition: margin-left ease .25s;
+}
+
+#mainwrapper.hide-sidebar {
+    margin-left:0px;
+    transition: margin-left ease .25s;
+}

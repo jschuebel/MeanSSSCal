@@ -1,0 +1,42 @@
+<p>
+  calendar-view works!
+</p>
+<!--angular2-fullcalendar [options]="calendarOptions" ></angular2-fullcalendar-->
+<div class="row text-center">
+  <div class="col-md-4">
+    <div class="btn-group">
+      <div
+        class="btn btn-primary"
+        mwlCalendarPreviousView
+        (viewDateChange)="handleEvent('Clicked', $event)"
+        [view]="view"
+        [(viewDate)]="viewDate">
+        Previous
+      </div>
+      <div
+        class="btn btn-outline-secondary"
+        mwlCalendarToday
+        [(viewDate)]="viewDate">
+        Today
+      </div>
+      <div
+        class="btn btn-primary"
+        mwlCalendarNextView
+        (viewDateChange)="handleEvent('Clicked', $event)"
+        [view]="view"
+        [(viewDate)]="viewDate">
+        Next
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <h3>{{ viewDate | calendarDate:(view + 'ViewTitle'):'en' }}</h3>
+  </div>
+</div>
+
+<mwl-calendar-month-view
+[activeDayIsOpen]="activeDayIsOpen"
+(dayClicked)="dayClicked($event.day)"
+[viewDate]="viewDate"
+[events]="events">
+
