@@ -19,11 +19,11 @@ import { Observable } from 'rxjs/Observable';
 })
 export class CalendarViewComponent implements OnInit {
   view: string = 'month';
-  viewDate: Date = new Date();
+  viewDate: Date;
   refresh: Subject<any> = new Subject();
   
     //events: Array<CalendarEvent<{ incrementsBadgeTotal: boolean }>> = 
-  events: MyEvent[];
+  events: any[];
   activeDayIsOpen: boolean = false;
   
 
@@ -37,15 +37,18 @@ export class CalendarViewComponent implements OnInit {
   }
 
   getEvents(): void {
-    this.events = [];
+    //this.events = [];
+    this.viewDate = new Date();
     var firstDay = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), 1);
     var lastDay = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth() + 1, 0);
     console.log("firstDay=", firstDay);
     console.log("lastDay=", lastDay);
    
-        this._dataService.geEvents(firstDay, lastDay)
-          .subscribe(res => { 
-            res.map(o => {
+        this._dataService.geCalendarEvents(firstDay, lastDay)
+          .then(res => { 
+            console.log("result geteents",res);
+            this.events = res;
+ /*           res.map(o => {
                 var dt = new Date(o.start);//Date);
                 dt.setFullYear(new Date().getFullYear());
                 return new MyEvent(o.title, colors.blue, dt);// { title: o.title, color: colors.blue, start: dt };
@@ -53,9 +56,12 @@ export class CalendarViewComponent implements OnInit {
           
               //this.events=this.events.slice(0,16);
               console.log("about to Refresh events", this.events);
+*/              
               setInterval(() => {
-                this.refresh.next();
-              }, 300);    
+                this.activeDayIsOpen = true;
+
+   //                    this.refresh.next();
+              }, 1000);    
               
     
             })

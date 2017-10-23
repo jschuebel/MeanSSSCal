@@ -40,6 +40,58 @@ let response = {
 router.get('/users', (req, res) => {
     connectionPerson((db) => {
         db.collection('people')
+            .aggregate([
+			//{ $match : { Name: /^James A/  } }, 
+			{ $lookup:
+			   {
+				 from: 'event',
+				 localField: '_id',
+				 foreignField: 'UserID',
+				 as: 'events'
+			   }
+			 }, 
+				{
+				  $project: 
+				  {
+					Name: 1,
+					HomePhone:1,
+					Email:1,
+					Mobile:1,
+					Fax:1,
+					Work:1,
+					events: 
+					{ 
+					  $filter: 
+					  { 
+						input: "$events", 
+						as: "evt", 
+						cond: { $eq: [ "$$evt.Category", "Birthday" ] } 
+					  } 
+					} 
+				  } 
+				} 
+			], function(err, peopleList) {
+			if (err) throw err;
+			db.close();
+			//res.forEach((ritm) => {
+				//console.log("Name", ritm.Name, "  Description=", ritm.events[0].Description, "  DOB=", ritm.events[0].Date);
+			//});
+			//peopleList.forEach((ritm) => {
+			//	if (ritm.events[0]!=null)
+			//		console.log("Name", ritm.Name, "  Description=", ritm.events[0].Description, "  DOB=", ritm.events[0].Date);
+			//	else
+			//		console.log("Name", ritm.Name, "  NOOOO BIRTHDAY");
+			//});
+			//console.log("result", res);
+			res.json(peopleList);
+		  })
+	  });
+});
+
+/* Get users
+router.get('/users2', (req, res) => {
+    connectionPerson((db) => {
+        db.collection('people')
             .find()
             .toArray()
             .then((people) => {
@@ -51,22 +103,20 @@ router.get('/users', (req, res) => {
             });
     });
 });
+*/
 
 // Get events
 router.get('/events', (req, res) => {
-    var startDate = new Date();
+    var startDate = new Date(1/1/0001);
     var endDate = new Date();
     
-    var startsecs=parseInt(req.query.start*1000);
-    var endsecs=parseInt(req.query.end*1000);
     //console.log("startsecs="+ startsecs + "  endsecs="+ endsecs);
    
-    startDate=new Date(2013,4,1);
-    endDate=new Date(2013,6,1);
+    console.log("startDate",startDate + "  endDate=", endDate);
     
     connectionEvent((db) => {
         db.collection('events')
-            .find({"Date" : {"$gte": startDate, "$lt": endDate}})
+            .find({"Date" : {"$gte": startDate, "$lt": endDate}},{Description:1, Category:1, Date:1, _id:0})
             .toArray()
             .then((events) => {
                 response.data = events;
@@ -346,7 +396,7 @@ router.get('/GetCalendarEvents', function(req, res) {
             });
         });
 
-        //console.log("lstEvents count=", lstEvents);
+        console.log("lstEvents count=", lstEvents);
         res.json(lstEvents);
       }, function(err) {
         console.error('The promise was rejected', err, err.stack);

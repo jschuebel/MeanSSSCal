@@ -18,12 +18,9 @@ module.exports = {
         }        
       })
     }).then(function(db) {
-      return new Promise(function(resolve, reject) {
-        var collection = db.collection('events');
-        resolve(collection);
-    })}).then(function(collection) {
 		
-		//var myresults=[];
+      var collection = db.collection('events');
+      //var myresults=[];
       let promises = [];
       promises.push(new Promise(function(resolve, reject) {
         collection.find({$where : mnths, Category:'Birthday'}).toArray(function(err, items) {

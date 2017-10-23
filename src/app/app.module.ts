@@ -16,6 +16,10 @@ import { PostsComponent } from './posts/posts.component';
 import { HeaderComponent } from './header/header.component';
 import { PersonsearchComponent } from './personsearch/personsearch.component';
 import { CalendarViewComponent } from './calendar-view/calendar-view.component';
+import {  TruncatePipe }   from '../Pipe';
+import { EventsearchComponent } from './eventsearch/eventsearch.component';
+//Must include for ngModel to be used
+import { FormsModule }   from '@angular/forms';
 
 const ROUTES : Routes = [
   {
@@ -26,6 +30,10 @@ const ROUTES : Routes = [
   {
     path: 'person',
     component: PersonsearchComponent
+  },
+  {
+    path: 'event',
+    component: EventsearchComponent
   },
   {
     path: 'calendar',
@@ -45,7 +53,9 @@ const ROUTES : Routes = [
     HeaderComponent,
     PersonsearchComponent,
    // CalendarComponent,
-    CalendarViewComponent
+    CalendarViewComponent,
+    TruncatePipe,
+    EventsearchComponent
   ],
   imports: [
     BrowserModule,
@@ -54,7 +64,8 @@ const ROUTES : Routes = [
     NgbModule.forRoot(),
 	  HttpModule,
     RouterModule.forRoot(ROUTES),
-    CalendarModule.forRoot()
+    CalendarModule.forRoot(),
+    FormsModule
   ],
   providers: [DataService],
   bootstrap: [AppComponent]

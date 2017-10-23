@@ -14,10 +14,13 @@ export class AppComponent {
   users: Array<any>;
   
   constructor(private _dataService:DataService) {
-	   // Access the Data Service's getUsers() method we defined
-    this._dataService.getUsers()
-        .subscribe(res => this.users = res);
   }
+
+  ngOnInit() {
+	   // Access the Data Service's getUsers() method we defined
+     this._dataService.getUsers()
+     .subscribe(res => this.users = res);
+  } 
   
    onClickMe() {
     this.showSideBar = !this.showSideBar;
