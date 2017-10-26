@@ -10,7 +10,8 @@
 </div>
 
 <div id="mainwrapper" [ngClass]="{'hide-sidebar': showSideBar}" >
-  <button type="button" (click)="onClickMe()" class="btn btn-outline-danger">Danger</button>
+  <button type="button" (click)="onClickMe()" class="btn btn-outline-danger"><i class="glyphicon glyphicon-large glyphicon-chevron-down"></i></button>
+  <button data-toggle="collapse" data-target="#collapseDiv"><i class="glyphicon glyphicon-large glyphicon-folder-close"></i></button>
   <h2>Our MongoDB is Working!</h2>
   <ul>
     <li *ngFor="let user of users | slice:0:5">{{ user.Name }}</li>

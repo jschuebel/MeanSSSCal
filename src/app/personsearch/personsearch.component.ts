@@ -54,10 +54,9 @@ export class PersonsearchComponent implements OnInit {
 }
 //https://ng-bootstrap.github.io/#/components/modal/examples
   open(content, person) {
-    console.log("open(person=",person);
+    console.log("open(person)=",person);
 	if (person.events[0].Date!=null)
 		person.events[0].Date = this.toJSONLocal(person.events[0].Date);
-    console.log("open(person=",person);
     this.message = "here is the select id = " + person.id;
     this.selectedPerson=person;
     this.modalService.open(content).result.then((result) => {

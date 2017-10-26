@@ -49,38 +49,56 @@ router.get('/users', (req, res) => {
 				 foreignField: 'UserID',
 				 as: 'events'
 			   }
-			 }, 
-				{
-				  $project: 
-				  {
-					Name: 1,
-					HomePhone:1,
-					Email:1,
-					Mobile:1,
-					Fax:1,
-					Work:1,
-					events: 
-					{ 
-					  $filter: 
-					  { 
-						input: "$events", 
-						as: "evt", 
-						cond: { $eq: [ "$$evt.Category", "Birthday" ] } 
-					  } 
-					} 
+			}, 
+			{ $lookup:
+			   {
+				 from: 'addresses',
+				 localField: 'AddressID',
+				 foreignField: '_id',
+				 as: 'addresses'
+			   }
+			},
+			{
+			  $project: 
+			  {
+				Name: 1,
+				HomePhone:1,
+				EMail:1,
+				Mobile:1,
+				Fax:1,
+				Work:1,
+				address : 
+				{ 
+				  $filter: 
+				  { 
+					input: "$addresses", 
+					as: "adr", 
+					cond: { $ne: [ "$$adr.Zip", "Birthday" ] } 
+				  } 
+				} ,
+				events: 
+				{ 
+				  $filter: 
+				  { 
+					input: "$events", 
+					as: "evt", 
+					cond: { $eq: [ "$$evt.Category", "Birthday" ] } 
 				  } 
 				} 
+			  } 
+			} 
 			], function(err, peopleList) {
 			if (err) throw err;
 			db.close();
-			//res.forEach((ritm) => {
-				//console.log("Name", ritm.Name, "  Description=", ritm.events[0].Description, "  DOB=", ritm.events[0].Date);
+			//peopleList.forEach((ritm) => {
+				//console.log("Name", ritm.Name, "      Event", (ritm.events!=null&&ritm.events.length>0?ritm.events:"N/A"));
+				//console.log("Address", ritm.address!=null?ritm.address[0]:"no");
 			//});
 			//peopleList.forEach((ritm) => {
-			//	if (ritm.events[0]!=null)
-			//		console.log("Name", ritm.Name, "  Description=", ritm.events[0].Description, "  DOB=", ritm.events[0].Date);
+			//	if (ritm.events!=null && ritm.events.length>0)
+			//		console.log("Name", ritm.Name, "  Description=", ritm.events[0].Description, "  DOB=", ritm.events[0].Date, "Address=", (ritm.address!=null && ritm.address.length>0?ritm.address[0].Address:"N/A"));
 			//	else
-			//		console.log("Name", ritm.Name, "  NOOOO BIRTHDAY");
+			//		console.log("Name", ritm.Name, "  NOOOO BIRTHDAY", "Address=", (ritm.address!=null && ritm.address.length>0?ritm.address[0].Address:"N/A"));
 			//});
 			//console.log("result", res);
 			res.json(peopleList);
