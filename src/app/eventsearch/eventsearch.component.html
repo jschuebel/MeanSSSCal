@@ -11,11 +11,11 @@
     
     <tr *ngFor="let aw of pagedItems">
       <td>{{aw.Category}}</td>
-      <td>Topic</td>
+      <td>{{aw.Topic}}</td>
       <td>{{aw.Description}}</td>
       <td>{{aw.Date | date}}</td>
-      <td>Name place</td>
-      <td><button ng-click="edititem(this.aw)" class="btn btn-primary btn-sm">Edit</button></td>
+      <td>{{aw.eventperson!=null && aw.eventperson[0]!=null?aw.eventperson[0].Name:"n/a"}}</td>
+      <td><button (click)="open(content, this.aw)" class="btn btn-primary btn-sm">Edit</button></td>
     </tr>
     <tr >
       <td colspan="3" style="text-align:right">
@@ -29,3 +29,66 @@
       </td>
     </tr>
 </table>
+
+
+<ng-template #content let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">Modal title</h4>
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+      <form id="edit-book-form" class="container-fluid"> 
+          <div class="row"> 
+                  <div class="col-xs-6 col-sm-4">
+                      <label class="label2" for="Name">Name</label>
+                  </div>
+                  <div class="col-xs-6 col-lg-8">
+                          <input class="form-control" type="text" name="Name" id="Name" [(ngModel)]="selectedEvent.eventperson[0].Name" /> 
+                  </div>
+          </div>  
+
+            <div class="row"> 
+                <div class="col-xs-6 col-sm-4" ></div>
+                <div class="col-xs-6 col-lg-8" >
+                        <select class="form-control" id="cboCategory" name="cboCategory" [(ngModel)]="selectedCategory" (ngModelChange)="onChange($event)" >
+                            <option *ngFor="let c of CategoryList" [ngValue]="c"> {{c}} </option>
+                        </select>                            
+                </div> 
+            </div> 
+            <div class="row" > 
+                    <div class="col-xs-6 col-sm-4" >
+                        <label  class="label2" for="Date">Date</label>
+                    </div>
+                    <div class="col-xs-6 col-lg-8" >
+                        <input class="form-control" type="text" name="Date" id="Date"  [(ngModel)]="selectedEvent.Date" /> 
+                    </div>
+            </div>  
+      
+
+            <div class="row" > 
+                    <div class="col-xs-6 col-sm-4" >
+                        <label  class="label2" for="Topic">Topic</label>
+                    </div>
+                    <div class="col-xs-6 col-lg-8" >
+                        <input class="form-control" type="text" name="Topic" id="Topic"  [(ngModel)]="selectedEvent.Topic" /> 
+                    </div>
+                </div>  
+            
+          <div class="row"> 
+              <div class="col-xs-6 col-sm-4" >
+                  <label class="label2" for="Description">Description</label>
+              </div>
+              <div class="col-xs-6 col-lg-8" >
+                  <input class="form-control" type="text" name="Description" id="Description" [(ngModel)]="selectedEvent.Description" /> 
+              </div>  
+          </div>  
+      </form> 
+   </div>
+  <div class="modal-footer">
+      <button type="button" class="btn btn-outline-dark" (click)="c('Saving')">Save</button>
+      <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">Close</button>
+  </div>
+</ng-template>
+

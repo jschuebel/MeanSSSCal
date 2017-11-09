@@ -6,21 +6,13 @@ const db = require('./db1');
 
 // Connect
 const connectionPerson = (closure) => {
-    return MongoClient.connect('mongodb://localhost:27017/personDB', (err, db) => {
+    return MongoClient.connect('mongodb://localhost:27017/SSSPersonDB', (err, db) => {
         if (err) return console.log(err);
 
         closure(db);
     });
 };
 
-// Connect
-const connectionEvent = (closure) => {
-    return MongoClient.connect('mongodb://localhost:27017/eventDB', (err, db) => {
-        if (err) return console.log(err);
-
-        closure(db);
-    });
-};
 
 // Error handling
 const sendError = (err, res) => {
@@ -44,45 +36,47 @@ router.get('/users', (req, res) => {
 			//{ $match : { Name: /^James A/  } }, 
 			{ $lookup:
 			   {
-				 from: 'event',
+				 from: 'events',
 				 localField: '_id',
 				 foreignField: 'UserID',
 				 as: 'events'
 			   }
 			}, 
-			{ $lookup:
-			   {
-				 from: 'addresses',
-				 localField: 'AddressID',
-				 foreignField: '_id',
-				 as: 'addresses'
-			   }
-			},
+//			{ $lookup:
+//			   {
+//				 from: 'addresses',
+//				 localField: 'Address ID',
+//				 foreignField: '_id',
+//				 as: 'addresses'
+//			   }
+//			},
 			{
 			  $project: 
 			  {
 				Name: 1,
-				HomePhone:1,
-				EMail:1,
+				"Home Phone":1,
+                "E-Mail":1,
+                "Address ID":1,
 				Mobile:1,
 				Fax:1,
-				Work:1,
-				address : 
-				{ 
-				  $filter: 
-				  { 
-					input: "$addresses", 
-					as: "adr", 
-					cond: { $ne: [ "$$adr.Zip", "Birthday" ] } 
-				  } 
-				} ,
+                Work:1,
+                Pager:1,
+//				address : 
+//				{ 
+//				  $filter: 
+//				  { 
+//					input: "$addresses", 
+//					as: "adr", 
+//					cond: { $ne: [ "$$adr.Zip", "Birthday" ] } 
+//				  } 
+//				} ,
 				events: 
 				{ 
 				  $filter: 
 				  { 
 					input: "$events", 
 					as: "evt", 
-					cond: { $eq: [ "$$evt.Category", "Birthday" ] } 
+					cond: { $eq: [ "$$evt.TopicID", 1 ] } 
 				  } 
 				} 
 			  } 
@@ -123,8 +117,92 @@ router.get('/users2', (req, res) => {
 });
 */
 
+
+
 // Get events
 router.get('/events', (req, res) => {
+    var startDate = new Date("1/1/0001");
+    var endDate = new Date();
+    
+    //console.log("startsecs="+ startsecs + "  endsecs="+ endsecs);
+   
+    console.log("startDate",startDate + "  endDate=", endDate);
+
+    connectionPerson((db) => {
+        db.collection('events')
+            .aggregate([
+                { $match : { Date: {"$gte": startDate, "$lt": endDate}} }, 
+				{ $lookup:
+                    {
+                      from: 'people',
+                      localField: 'UserID',
+                      foreignField: '_id',
+                      as: 'eventperson'
+                    }
+                }
+			], function(err, eventList) {
+			if (err) throw err;
+			db.close();
+			res.json(eventList);
+		  })
+	  });
+});
+
+
+router.get('/addresses', (req, res) => {
+    connectionPerson((db) => {
+        db.collection('addresses')
+        .find()
+        .toArray()
+        .then((addresses) => {
+             //   console.log("addresses",addresses);
+                response.data = addresses;
+                res.json(response);
+            })
+            .catch((err) => {
+                sendError(err, res);
+            });
+    });
+});
+
+
+router.post('/eventemail', function(req, res) {
+    console.log("req.body",req.body);    //body to json from a post
+//    console.log("req.query", req.query);
+
+    connectionPerson((db) => {
+        db.collection('events')
+            .update({_id:req.body.id}, { $set : {'Emails': req.body.Emails}})
+            .then(() => {
+                console.log("Event Saved",req.body.id);
+                response.data = { status:"event saved"};
+                res.json(response);
+            })
+            .catch((err) => {
+                console.log("event email save failed",err);
+                sendError(err, res);
+            });
+    });
+});
+
+
+router.get('/categories', (req, res) => {
+    connectionPerson((db) => {
+        db.collection('events')
+            .distinct("Category")
+            .then((Categories) => {
+             //   console.log("Categories",Categories);
+                response.data = Categories;
+                res.json(response);
+            })
+            .catch((err) => {
+                sendError(err, res);
+            });
+    });
+});
+
+/*
+router.get('/events2', (req, res) => {
     var startDate = new Date(1/1/0001);
     var endDate = new Date();
     
@@ -132,7 +210,7 @@ router.get('/events', (req, res) => {
    
     console.log("startDate",startDate + "  endDate=", endDate);
     
-    connectionEvent((db) => {
+    connectionPerson((db) => {
         db.collection('events')
             .find({"Date" : {"$gte": startDate, "$lt": endDate}},{Description:1, Category:1, Date:1, _id:0})
             .toArray()
@@ -145,7 +223,7 @@ router.get('/events', (req, res) => {
             });
     });
 });
-
+*/
 
 //*****************************  Users GetCalendarEvents method
 //*****************************  Users GetCalendarEvents method

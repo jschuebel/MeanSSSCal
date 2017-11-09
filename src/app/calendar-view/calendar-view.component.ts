@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import { NgSwitchCase } from '@angular/common';
 //import {CalendarComponent} from "ap-angular2-fullcalendar/src/calendar/calendar";
 import { DataService } from '../data.service';
-import { MyEvent, colors } from '../MyEvent';
+import { MyEvent, colors } from '../Model/MyEvent';
 import { CalendarEvent } from 'angular-calendar';
 import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';

@@ -20,6 +20,7 @@ import {  TruncatePipe }   from '../Pipe';
 import { EventsearchComponent } from './eventsearch/eventsearch.component';
 //Must include for ngModel to be used
 import { FormsModule }   from '@angular/forms';
+import { EmailComponent } from './email/email.component';
 
 const ROUTES : Routes = [
   {
@@ -34,6 +35,10 @@ const ROUTES : Routes = [
   {
     path: 'event',
     component: EventsearchComponent
+  },
+  {
+    path: 'email',
+    component: EmailComponent
   },
   {
     path: 'calendar',
@@ -55,7 +60,8 @@ const ROUTES : Routes = [
    // CalendarComponent,
     CalendarViewComponent,
     TruncatePipe,
-    EventsearchComponent
+    EventsearchComponent,
+    EmailComponent
   ],
   imports: [
     BrowserModule,

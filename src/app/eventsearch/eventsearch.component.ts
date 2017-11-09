@@ -9,6 +9,8 @@ import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 })
 export class EventsearchComponent implements OnInit {
   message = "People List Message";
+  
+  CategoryList = [];
   EventDataList = [];
   pagedItems: any[];
   errorMessage = "";
@@ -16,6 +18,10 @@ export class EventsearchComponent implements OnInit {
   currentPage = 0;
   pageSize = 10;
   numberOfPages=2;
+
+  selectedEvent: any;
+  selectedCategory: any;
+  closeResult: string;
   
   constructor(private _dataService:DataService, private modalService: NgbModal) { }
 
@@ -27,6 +33,19 @@ export class EventsearchComponent implements OnInit {
       this.numberOfPages = Math.round(this.EventDataList.length / this.pageSize);
       this.setPage();
     });
+
+    this._dataService.getCategories()
+    .subscribe(res => {
+      this.CategoryList = res;
+      console.log("CategoryList=",this.CategoryList);
+    });
+
+
+  }
+
+  onChange(Category) {
+    console.log("Category=",Category);
+    alert(Category);
   }
 
   setPage() {
@@ -44,6 +63,46 @@ export class EventsearchComponent implements OnInit {
     console.log("this.pagedItems=",this.pagedItems);
   }
 
+  toJSONLocal (date) {
+	  var local = new Date(date);
+    //local.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    return local.toJSON().slice(0, 10);
+  }
+  
+
+
+  //https://ng-bootstrap.github.io/#/components/modal/examples
+  open(content, event) {
+    // console.log("open(person)=",person);
+  if (event.Date!=null)
+  event.Date = this.toJSONLocal(event.Date);
+
+    this.message = "here is the select id = " + event._id;
+    this.selectedEvent=event;
+    this.selectedCategory=event.Category;
+
+    //console.log("open(selectedAddress)=",this.selectedAddress);
+      
+
+
+    this.modalService.open(content).result.then((result) => {
+      this.closeResult = `Closed with: ${result}`;
+      if (result=="Saving")
+        console.log("Save(event)=",this.selectedEvent);
+    }, (reason) => {
+      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+    });
+  }
+
+  private getDismissReason(reason: any): string {
+    if (reason === ModalDismissReasons.ESC) {
+      return 'by pressing ESC';
+    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
+      return 'by clicking on a backdrop';
+    } else {
+      return  `with: ${reason}`;
+    }
+  }
 
 
 }

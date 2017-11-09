@@ -9,7 +9,7 @@ const api = require('./server/routes/api');
 
 // Parsers
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false}));
+app.use(bodyParser.urlencoded({ extended: true}));
 
 // Angular DIST output folder
 app.use(express.static(path.join(__dirname, 'dist')));
