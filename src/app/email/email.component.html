@@ -1,9 +1,9 @@
-<div class="text-danger" [hidden]="errorMessage">{{message}}</div>
+<div class="text-danger" [hidden]="message">{{message}}</div>
 
 <div class="container" style="border: 3px solid blue;">
 <div class="row justify-content-md-center">
         <select id="cboEvent" name="cboEvent"   [(ngModel)]="SelectedEvent" (ngModelChange)="onChange($event)">
-              <option *ngFor="let e of EventDataList"   [ngValue]="e"> {{e.Topic}} </option>
+              <option *ngFor="let e of EventDataList"   [ngValue]="e"> {{e.DisplayOnly}} </option>
           </select>
 </div>
 <div class="row">
@@ -16,24 +16,30 @@
     </div>
     <div class="row justify-content-md-center">
             <div class="col col-md-auto">
-                <select multiple  size="15" (change)="change($event.target.options)"  >
+                <select #cboPeople multiple  size="15"   >
                         <option *ngFor="let p of UnSelectedEmailList" [value]="p._id" > {{p.Name}} </option>
                 </select>                            
                               
             </div>
             <div class="col col-md-2">
-                    <div class="row justify-content-md-center">
-                            <button (click)="UpdateSelection();" class="btn btn-primary btn-sm">Update</button>
+                <div class="row justify-content-md-center">
+                                <button (click)="Move2SELPople();" class="btn btn-primary btn-sm"><i class="fa fa-angle-right"></i></button>
+                </div>
+                <div class="row justify-content-md-center">
+                        &nbsp;
+                </div>
+                <div class="row justify-content-md-center">
+                                <button (click)="Move2Pople();" class="btn btn-primary btn-sm"><i class="fa fa-angle-left"></i></button>
                         </div>
-                        <div class="row justify-content-md-center">
-                            &nbsp;
-                        </div>
-                        <div class="row justify-content-md-center">
-                                <button [disabled]="SelectedEmailIDList == 0"  (click)="Save();" class="btn btn-primary btn-sm">Save</button>
-                        </div>
+                <div class="row justify-content-md-center">
+                        &nbsp;
+                </div>
+                <div class="row justify-content-md-center">
+                        <button [disabled]="SelectedEmailIDList.length == 0"  (click)="Save();" class="btn btn-primary btn-sm">Save</button>
+                </div>
             </div>
             <div class="col col-md-auto">
-                <select multiple  size="15" (change)="changeSEL($event.target.options)"  >
+                <select #cboSELPeople multiple  size="15"   >
                         <option *ngFor="let s of SelectedEmailList" [value]="s._id" > {{s.Name}} </option>
                 </select>                            
             </div>

@@ -28,12 +28,97 @@ let response = {
     message: null
 };
 
+function updateUser(db, user) {
+    //returns a promise that resolves to a quiz
+    return new Promise(function(resolve, reject){
+        console.log("saving... usr = ",user);
+        db.collection('people')
+        .save(user, function(err, usobj) {
+             if (err) {
+                console.log("User save failed",err);
+                return reject(err);
+            }
+            else {
+                console.log("updateUser Saved!  usobj=",usobj);
+                //console.log("updateUser Saved!  usobj.result.nModified=",usobj.result.nModified);
+                //console.log("updateUser Saved!  usobj=",usobj.result.nModified);
+                
+                return resolve(user);
+            }
+        })
+    });
+  }
+
+  function updateEvent(db, event) {
+    //returns a promise that resolves to a quiz
+    return new Promise(function(resolve, reject){
+        console.log("saving... evt = ",event);
+        db.collection('events')
+        .save(event, function(err, evtobj) {
+            db.close();
+            if (err) {
+                console.log("event email save failed",err);
+                return reject(err);
+            }
+            else {
+                console.log("Event Saved evtobj=",evtobj);
+                //console.log("Event Saved",evtobj._id);
+                return resolve(event);
+            }
+        })
+    });
+  }
+  
+
+
+router.post('/user', function(req, res) {
+    //console.log("req.body",req.body);    //body to json from a post
+    //console.log("req.query", req.query);
+
+    var hldUser = JSON.parse(JSON.stringify(req.body.person));
+    var hldEvent= {};
+    if (req.body.person!=null && req.body.person.events!=null)
+        hldEvent = hldUser.events[0];
+    delete hldUser.events;
+    hldEvent.Date = new Date(hldEvent.Date);
+    console.log("hldEvent", hldEvent);
+    console.log("hldUser", hldUser);
+
+    //need to save birthday event separatly
+
+    /*make sure the date is not a string.
+        req.body.event.createdate = new Date(req.body.event.createdate);
+    */    
+    connectionPerson((db) => {
+		Promise.all([
+           updateUser(db,hldUser),
+           updateEvent(db,hldEvent),
+        ]).then(values => { 
+                db.close();
+                console.log("User Saved evtobj=",req.body);
+                //console.log("Event Saved",evtobj._id);
+                response.data = { status:"User saved", person:req.body};
+                res.json(response);
+            })
+			.catch(err => {
+                db.close();
+                console.log("user save failed",err);
+                sendError(err, evtobj);
+        // handle the error
+            }); //unify error handling inside an express module
+        
+    });
+});
+
+
 // Get users
 router.get('/users', (req, res) => {
     connectionPerson((db) => {
         db.collection('people')
             .aggregate([
-			//{ $match : { Name: /^James A/  } }, 
+            //{ $match : { Name: /^James A/  } }, 
+            
+            {$sort: {Name: 1}},
 			{ $lookup:
 			   {
 				 from: 'events',
@@ -126,12 +211,12 @@ router.get('/events', (req, res) => {
     
     //console.log("startsecs="+ startsecs + "  endsecs="+ endsecs);
    
-    console.log("startDate",startDate + "  endDate=", endDate);
+    console.log("/Events  startDate",startDate + "  endDate=", endDate);
 
     connectionPerson((db) => {
         db.collection('events')
             .aggregate([
-                { $match : { Date: {"$gte": startDate, "$lt": endDate}} }, 
+                { $match : { $or: [ {Date: {"$gte": startDate, "$lt": endDate}}, {$and:[{Date: {$ne:null}} ,{TopicID:1}]}  ]}}, 
 				{ $lookup:
                     {
                       from: 'people',
@@ -139,7 +224,8 @@ router.get('/events', (req, res) => {
                       foreignField: '_id',
                       as: 'eventperson'
                     }
-                }
+                },
+                {$sort: {Date: 1}}
 			], function(err, eventList) {
 			if (err) throw err;
 			db.close();
@@ -155,6 +241,7 @@ router.get('/addresses', (req, res) => {
         .find()
         .toArray()
         .then((addresses) => {
+            db.close();
              //   console.log("addresses",addresses);
                 response.data = addresses;
                 res.json(response);
@@ -166,6 +253,33 @@ router.get('/addresses', (req, res) => {
 });
 
 
+router.post('/event', function(req, res) {
+    console.log("post event");
+    //console.log("req.body",req.body);    //body to json from a post
+    //console.log("req.query", req.query);
+  
+    //make sure the date is not a string.
+    req.body.event.Date = new Date(req.body.event.Date);
+    req.body.event.createdate = new Date(req.body.event.createdate);
+    console.log("req.body.event",req.body.event);
+    
+    connectionPerson((db) => {
+        db.collection('events')
+        updateEvent(db, req.body.event).then(() => { 
+            db.close();
+            console.log("User Saved evtobj=",req.body);
+            response.data = { status:"event saved", person:req.body};
+            res.json(response);
+        })
+        .catch(err => {
+            db.close();
+            console.log("event email save failed",err);
+            sendError(err, evtobj);
+        });
+    });
+    
+});
+
 router.post('/eventemail', function(req, res) {
     console.log("req.body",req.body);    //body to json from a post
 //    console.log("req.query", req.query);
@@ -174,11 +288,13 @@ router.post('/eventemail', function(req, res) {
         db.collection('events')
             .update({_id:req.body.id}, { $set : {'Emails': req.body.Emails}})
             .then(() => {
+                db.close();
                 console.log("Event Saved",req.body.id);
                 response.data = { status:"event saved"};
                 res.json(response);
             })
             .catch((err) => {
+                db.close();
                 console.log("event email save failed",err);
                 sendError(err, res);
             });
@@ -191,11 +307,13 @@ router.get('/categories', (req, res) => {
         db.collection('events')
             .distinct("Category")
             .then((Categories) => {
+                db.close();
              //   console.log("Categories",Categories);
                 response.data = Categories;
                 res.json(response);
             })
             .catch((err) => {
+                db.close();
                 sendError(err, res);
             });
     });
@@ -256,10 +374,9 @@ function GetEaster(wYear) {
                                   
 router.get('/GetCalendarEvents', function(req, res) {
     //db.users.find().skip(pagesize*(n-1)).limit(pagesize)
-    console.log("==========>New Request");    //body to json from a post
     //console.log(req.body);    //body to json from a post
     //  console.log("hit GetCalendarEvents");  //querystring to json
-    console.log(req.query);  //querystring to json
+    //console.log(req.query);  //querystring to json
     var lstEvents = new Array();
     var startDate = new Date();
     var endDate = new Date();
@@ -492,17 +609,17 @@ router.get('/GetCalendarEvents', function(req, res) {
             });
         });
 
-        console.log("lstEvents count=", lstEvents);
+       // console.log("lstEvents count=", lstEvents);
         res.json(lstEvents);
       }, function(err) {
         console.error('The promise was rejected', err, err.stack);
       });
 
-/*      
-	//Get Events == birthday and with 
-     connectionEvent((db) => {
+    //Get Events == birthday and with 
+/*    
+    connectionPerson((db) => {
         db.collection('events')
-            .find({$where : mnths, Category:'Birthday'})  //{"Date" : {"$gte": startDate, "$lt": endDate}}
+            .find({Date:{"$ne":null}, $where : mnths, Category:'Birthday'})  //{"Date" : {"$gte": startDate, "$lt": endDate}}
             .toArray()
             .then((events) => {
 
@@ -515,8 +632,8 @@ router.get('/GetCalendarEvents', function(req, res) {
                     lstEvents.push(evt);
                 });
      
-//                response.data = events;
-//                res.json(response);
+                response.data = lstEvents;
+                res.json(response);
             })
             .catch((err) => {
                 console.log("=================>Exception dumping lstevents");
@@ -524,6 +641,7 @@ router.get('/GetCalendarEvents', function(req, res) {
                 sendError(err, res);
             });
     });
+      
 
 	//Get Events != birthday and with 
     connectionEvent((db) => {

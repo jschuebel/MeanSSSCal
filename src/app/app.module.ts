@@ -25,7 +25,7 @@ import { EmailComponent } from './email/email.component';
 const ROUTES : Routes = [
   {
     path: '',
-    redirectTo: 'posts',
+    redirectTo: 'calendar',
     pathMatch: 'full'
   },
   {

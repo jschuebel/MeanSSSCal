@@ -8,9 +8,11 @@ export class Event {
     Topic: string;
     Category: string;
     Date: Date;
+    createdate: Date;
     repeatYearly: boolean;
     repeatMonthly: boolean;
     Description: string;
+    DisplayOnly: string;
     eventperson: Person[] = [];
     Emails: number[] = [];
   };

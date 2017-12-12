@@ -10,7 +10,7 @@ var Promise = require('rsvp').Promise;
 module.exports = {
   FindinCol1: function(mnths, startDate, endDate) {
     return new Promise(function(resolve, reject) {
-      MongoClient.connect('mongodb://localhost:27017/eventDB', function(err, db) {
+      MongoClient.connect('mongodb://localhost:27017/SSSPersonDB', function(err, db) {
         if (err) {
           reject(err);  
         } else {
@@ -23,7 +23,7 @@ module.exports = {
       //var myresults=[];
       let promises = [];
       promises.push(new Promise(function(resolve, reject) {
-        collection.find({$where : mnths, Category:'Birthday'}).toArray(function(err, items) {
+        collection.find({Date:{"$ne":null}, $where : mnths, Category:'Birthday'}).toArray(function(err, items) {
           if (err) {
             reject(err);
           } else {

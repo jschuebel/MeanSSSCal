@@ -1,4 +1,4 @@
-<div class="text-danger" [hidden]="errorMessage">{{message}}</div>
+<div class="text-danger" *ngIf="message">{{message}}</div>
 <div >closeResult={{closeResult}}</div>
 <button ng-disabled="isAdmin" (click)="open(content,null);">Create Person</button>
 

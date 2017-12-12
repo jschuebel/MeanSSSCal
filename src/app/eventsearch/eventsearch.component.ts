@@ -2,18 +2,21 @@ import { Component, OnInit } from '@angular/core';
 import { DataService } from '../data.service';
 import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 
+import { Person } from '../Model/Person';
+
 @Component({
   selector: 'app-eventsearch',
   templateUrl: './eventsearch.component.html',
   styleUrls: ['./eventsearch.component.css']
 })
 export class EventsearchComponent implements OnInit {
-  message = "People List Message";
+  message: string;
+  PeopleList : Person[] = [];
+  SelectedPerson : Person;
   
   CategoryList = [];
   EventDataList = [];
   pagedItems: any[];
-  errorMessage = "";
 
   currentPage = 0;
   pageSize = 10;
@@ -26,6 +29,16 @@ export class EventsearchComponent implements OnInit {
   constructor(private _dataService:DataService, private modalService: NgbModal) { }
 
   ngOnInit() {
+
+    this._dataService.getUsers()
+    .subscribe(res => {
+      this.PeopleList = res;
+      console.log("peoplelist=",this.PeopleList);
+    },
+    err => {
+      console.log("Error from getUsers", err)
+    });
+
     this._dataService.getEvents()
     .subscribe(res => {
       this.EventDataList = res;
@@ -41,6 +54,11 @@ export class EventsearchComponent implements OnInit {
     });
 
 
+  }
+
+  onChangeName(person : Person) {
+    console.log("person=",person);
+    alert(person);
   }
 
   onChange(Category) {
@@ -87,8 +105,10 @@ export class EventsearchComponent implements OnInit {
 
     this.modalService.open(content).result.then((result) => {
       this.closeResult = `Closed with: ${result}`;
-      if (result=="Saving")
+      if (result=="Saving") {
         console.log("Save(event)=",this.selectedEvent);
+        this.Save();
+      }
     }, (reason) => {
       this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
     });
@@ -104,5 +124,16 @@ export class EventsearchComponent implements OnInit {
     }
   }
 
-
+  Save() {
+    this._dataService.saveEvent(this.selectedEvent)
+    .subscribe(res => {
+      console.log("Save res =",res);
+      this.message = res.data.status;
+    },
+    err => {
+      console.log("Error from Save", err)
+    });
+  
+  }
+  
 }

@@ -5,7 +5,8 @@
                 "type": "node",
                 "request": "launch",
                 "name": "Launch Program",
-                "program": "${file}"
+                "program": "${workspaceRoot}\\server.js",
+                "cwd": "${workspaceRoot}"
             }
         ]
     }

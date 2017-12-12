@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef} from '@angular/core';
 import { NgSwitchCase } from '@angular/common';
 //import {CalendarComponent} from "ap-angular2-fullcalendar/src/calendar/calendar";
 import { DataService } from '../data.service';
@@ -27,7 +27,7 @@ export class CalendarViewComponent implements OnInit {
   activeDayIsOpen: boolean = false;
   
 
-  constructor(private _dataService:DataService) { }
+  constructor(private _dataService:DataService,private ref: ChangeDetectorRef) { }
 
   ngOnInit() {
     //this.events=[];
@@ -44,10 +44,15 @@ export class CalendarViewComponent implements OnInit {
     console.log("firstDay=", firstDay);
     console.log("lastDay=", lastDay);
    
-        this._dataService.geCalendarEvents(firstDay, lastDay)
+        this._dataService.getCalendarEvents(firstDay, lastDay)
           .then(res => { 
+            console.log("returned from getCalendarEvents");
             console.log("result geteents",res);
             this.events = res;
+            this.events.forEach((ritm) => {
+                if ((new Date(ritm.start)).getDay()===this.viewDate.getDay())
+                  this.activeDayIsOpen = true;
+			      });
  /*           res.map(o => {
                 var dt = new Date(o.start);//Date);
                 dt.setFullYear(new Date().getFullYear());
@@ -57,12 +62,18 @@ export class CalendarViewComponent implements OnInit {
               //this.events=this.events.slice(0,16);
               console.log("about to Refresh events", this.events);
 */              
+/*
               setInterval(() => {
                 this.activeDayIsOpen = true;
 
    //                    this.refresh.next();
               }, 1000);    
+*/              
               
+              setInterval(() => {
+                // the following is required, otherwise the view will not be updated
+                this.ref.markForCheck();
+              }, 1000);           
     
             })
             //this.refresh.next();
@@ -77,9 +88,11 @@ export class CalendarViewComponent implements OnInit {
         //) {
 //          this.activeDayIsOpen = false;
   //      } else {
+        if (events.length !== 0)
           this.activeDayIsOpen = true;
-          this.viewDate = date;
-         // console.log("dayclicked viewDate=" + this.viewDate);
+          else
+          this.activeDayIsOpen = false;
+        this.viewDate = date;         // console.log("dayclicked viewDate=" + this.viewDate);
           //    }
     //  }
     }

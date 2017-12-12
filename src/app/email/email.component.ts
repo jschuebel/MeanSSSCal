@@ -12,8 +12,8 @@ import  * as _ from 'lodash';
   styleUrls: ['./email.component.css']
 })
 export class EmailComponent implements OnInit {
- // @ViewChild('cboPeople') selectElRef;
- // @ViewChild('cboSELPeople') selectSELElRef;
+  @ViewChild('cboPeople') selectElRef;
+  @ViewChild('cboSELPeople') selectSELElRef;
   PeopleList : Person[] = [];
   UnSelectedEmailList : Person[] = [];
   SelectedEmailList : Person[] = [];
@@ -39,7 +39,24 @@ export class EmailComponent implements OnInit {
 	
     this._dataService.getEvents()
     .subscribe(res => {
-      this.EventDataList = res;
+      var evt = new Event();
+      evt._id=-1;
+      evt.DisplayOnly="** Choose Event **";
+      evt.Date = new Date();
+      res.unshift(evt)
+      this.SelectedEvent=evt;
+      
+      res.forEach(item => {
+//        console.log("item.Description", item.Description, "  Date", item.Date);
+        if (item._id!=-1)
+          item.DisplayOnly =  ((item.Description==null || (item.Description!=null && item.Description.trim().length==0))?
+                (item.Topic==null?"N/A":item.Topic):item.Description.substring(0,25)) 
+                    + "......" + (item.Date==null?"N/A":this.toJSONLocal(item.Date));
+        console.log("item.DisplayOnly", item.DisplayOnly);
+      });
+
+      this.EventDataList= _.orderBy(res, [evt => evt.DisplayOnly], ['asc']);
+      
       console.log("EventDataList=",this.EventDataList);
     },
     err => {
@@ -48,10 +65,18 @@ export class EmailComponent implements OnInit {
 	
 }
 
+toJSONLocal (date) {
+  var local = new Date(date);
+  //local.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  return local.toJSON().slice(0, 10);
+}
+
 UpdateLists() {
 
   console.log("UpdateLists this.SelectedEmailIDList=", this.SelectedEmailIDList);
   
+  this.UnSelectedEmailList  = [];
+  this.SelectedEmailList  = [];
   if (this.SelectedEmailIDList==null || (this.SelectedEmailIDList!=null && this.SelectedEmailIDList.length==0)) {
     this.UnSelectedEmailList=this.PeopleList;
   }
@@ -74,18 +99,6 @@ UpdateLists() {
         }
         return memo;
       }, []);
-
-      /*
-      let options = this.selectElRef.nativeElement.options;
-      for(let i=0; i < options.length; i++) {
-        if (_.includes(currList, options[i].value)) {
-            options[i].selected = true;
-        }
-        else
-          options[i].selected = false;
-      }
-      */
-
   }
 } 
 
@@ -97,12 +110,13 @@ onChange(evnt) {
     
   }
 
+/* this get added to select==> (change)="changeSEL($event.target.options)"
 changeSEL(options) {
   console.log("change cboSELPeople options=", options);
   var hldSel = [];
   Array.apply(null,options)  // convert to real Array
     .filter(option => option.selected)
-    .map(option => {     /*console.log("option=", option.value);*/ hldSel.push(parseInt(option.value)); return  parseInt(option.value) });
+    .map(option => {  hldSel.push(parseInt(option.value)); return  parseInt(option.value) });
 
     //console.log("change cboSELPeople hldSel=", hldSel);
     
@@ -112,21 +126,54 @@ changeSEL(options) {
   //console.log("change this.SelectedEmailIDList=", this.SelectedEmailIDList);
   
 }
+*/
 
+/* this get added to select==> (change)="change($event.target.options)"
 change(options) {
   console.log("change cboPeople options=", options);
   var hldSel = Array.apply(null,options)  // convert to real Array
     .filter(option => option.selected)
-    .map(option => {     /*console.log("option=", option);*/ this.SelectedEmailIDList.push(parseInt(option.value)); return  parseInt(option.value) });
-    //console.log("change this.SelectedEmailIDList=", this.SelectedEmailIDList);
-    
-    
+    .map(option => {     console.log("option=", option); this.SelectedEmailIDList.push(parseInt(option.value)); return  parseInt(option.value) });
+    console.log("change this.SelectedEmailIDList=", this.SelectedEmailIDList);
+  
+}
+*/
 
+Move2Pople() {
+  //console.log("Move2Pople");
+  let options = this.selectSELElRef.nativeElement.options;
+  for(let i=0; i < options.length; i++) {
+    if (options[i].selected) {
+      console.log("REF selectSELElRef option=", options[i]);
+        _.remove(this.SelectedEmailIDList, function (selVal) {
+        return (parseInt(options[i].value) == selVal);
+      });
+    }
+  }
+  console.log("Move2Pople this.SelectedEmailIDList=", this.SelectedEmailIDList);
+  this.UpdateLists();  
 }
 
+Move2SELPople() {
+  //console.log("Move2SELPople");
+  let options = this.selectElRef.nativeElement.options;
+  //console.log("options.length=", options.length);
+  for(let i=0; i < options.length; i++) {
+    if (options[i].selected) {
+      console.log("REF selectElRef option=", options[i]);
+      this.SelectedEmailIDList.push(parseInt(options[i].value));
+    }
+  }
+  console.log("Move2SELPople this.SelectedEmailIDList=", this.SelectedEmailIDList);
+  this.UpdateLists();  
+}
+
+
+/*}
 UpdateSelection() {
   this.UpdateLists();
 }
+*/
 
 Save() {
   this._dataService.saveEmails(this.SelectedEvent)

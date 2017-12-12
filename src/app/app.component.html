@@ -11,10 +11,6 @@
 
 <div id="mainwrapper" [ngClass]="{'hide-sidebar': showSideBar}" >
   <button type="button" (click)="onClickMe()" class="btn btn-outline-primary"><i class="fa"  [ngClass]="{'fa-folder-open-o': !showSideBar, 'fa-folder': showSideBar}" ></i></button>
-  <h2>Our MongoDB is Working!</h2>
-  <ul>
-    <li *ngFor="let user of users | slice:0:5">{{ user.Name }}</li>
-  </ul>
 
   <router-outlet></router-outlet>
 </div>

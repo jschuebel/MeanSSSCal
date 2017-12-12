@@ -4,6 +4,8 @@ import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
 import { PostsComponent } from './posts.component';
+import { DataService } from '../data.service';
+import { MoqDataService } from '../../../spec/MoqDataService.spec';
 
 describe('PostsComponent', () => {
   let component: PostsComponent;
@@ -11,7 +13,10 @@ describe('PostsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ PostsComponent ]
+      declarations: [ PostsComponent ],
+      imports: [ ],
+      providers: [ {provide: DataService, useClass: MoqDataService} ]
+//      providers: [DataService],
     })
     .compileComponents();
   }));

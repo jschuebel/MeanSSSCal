@@ -1,4 +1,38 @@
-<div class="text-danger" [hidden]="errorMessage">{{errorMessage}}</div>
+<div class="container">
+<table class="table table-responsive table-condensed"> 
+    <tr>
+        <td ><label for="name" class="label">Name:</label></td> 
+        <td>
+            <select id="fltname" name="fltname"   [(ngModel)]="SelectedPerson" (ngModelChange)="onChangeName($event)">
+                    <option *ngFor="let e of PeopleList"   [ngValue]="e"> {{e.Name}} </option>
+            </select>
+                  
+        </td>
+    </tr> 
+    <tr>
+        <td><label class="label" for="fromDate">From Date:</label></td> 
+    <td colspan="3">
+        <table>
+            <tr>
+                <td><input type="text"  name="fromDate" id="fromDate" /></td>
+                <td><label class="label">To Date:</label></td>
+                <td><input type="text" class="editor-field" name="toDate" id="toDate" style="width:85px;" /></td>
+            </tr>
+        </table>
+    </td>
+    </tr>
+    <tr>
+        <td><label class="label">Description:</label></td>
+        <td><input type="text" class="editor-field" name="Search" id="Search" style="width:300px;" /></td>
+        <td colspan="2">&nbsp;</td>
+    </tr>
+
+    <tr>
+        <td align="center" colspan="4"><input type="button" id="btnFiliter" class="btn btn-primary" value="Filter" /></td>
+    </tr>
+</table>
+
+<div class="text-danger" *ngIf="message">{{message}}</div>
 <table class="table table-responsive table-striped table-hover table-condensed">
     <tr>
         <th>Category</th>
@@ -50,7 +84,7 @@
           </div>  
 
             <div class="row"> 
-                <div class="col-xs-6 col-sm-4" ></div>
+                <div class="col-xs-6 col-sm-4" >Category</div>
                 <div class="col-xs-6 col-lg-8" >
                         <select class="form-control" id="cboCategory" name="cboCategory" [(ngModel)]="selectedCategory" (ngModelChange)="onChange($event)" >
                             <option *ngFor="let c of CategoryList" [ngValue]="c"> {{c}} </option>
@@ -92,3 +126,4 @@
   </div>
 </ng-template>
 
+</div>

@@ -14,14 +14,13 @@ import  * as _ from 'lodash';
 })
 export class PersonsearchComponent implements OnInit {
   isBusy = true;
-  message = "People List Message";
+  message: string;
   PeopleDataList : Person[] = [];
   AddressList : Address[] = [];
   pagedItems: Person[] = [];
   selectedPerson: Person;
   selectedAddress: Address;
-  errorMessage = "";
-
+  
   currentPage = 0;
   pageSize = 10;
   numberOfPages=2;
@@ -119,8 +118,9 @@ export class PersonsearchComponent implements OnInit {
 
     this.modalService.open(content).result.then((result) => {
       this.closeResult = `Closed with: ${result}`;
-      if (result=="Saving")
-        console.log("Save(person)=",this.selectedPerson);
+      if (result=="Saving") {
+        this.Save();
+      }
     }, (reason) => {
       this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
     });
@@ -135,6 +135,20 @@ export class PersonsearchComponent implements OnInit {
       return  `with: ${reason}`;
     }
   }
-
+  
+  
+  Save() {
+    console.log("Save(person)=",this.selectedPerson);
+    this._dataService.savePerson(this.selectedPerson)
+    .subscribe(res => {
+      console.log("back from user");
+      console.log("Save res =",res);
+      this.message = res.status;
+    },
+    err => {
+      console.log("Error from Save", err)
+    });
+  
+  }
 
 }

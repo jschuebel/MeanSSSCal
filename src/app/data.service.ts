@@ -4,6 +4,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/toPromise';
 import { MyEvent, colors } from './Model/MyEvent';
 import { Event } from './Model/Event';
+import { Person } from './Model/Person';
 
 @Injectable()
 export class DataService {
@@ -19,16 +20,29 @@ export class DataService {
 //    .map(result=>this.result=result.json().data);
   }
 
+  
+  savePerson(person : Person ) {
+    var hldperson = JSON.parse(JSON.stringify(person));
+    return this._http.post("/api/user",{ person: person})
+    .map(result=>this.result=result.json().data);
+  }
+
   getUsers() {
     return this._http.get("/api/users")
     .map(result=>this.result=result.json());
-//    .map(result=>this.result=result.json().data);
+  }
+
+  saveEvent(event : Event ) {
+    //deep clone and remove the extra information
+    var hldevent = JSON.parse(JSON.stringify(event));
+    delete hldevent.eventperson;
+     return this._http.post("/api/event",{ event: hldevent})
+    .map(result=>this.result=result.json());
   }
 
   getEvents() {
     return this._http.get("/api/events")
     .map(result=>this.result=result.json());
-//    .map(result=>this.result=result.json().data);
   }
 
   getAddresses() {
@@ -41,7 +55,7 @@ export class DataService {
     .map(result=>this.result=result.json().data);
   }
 
-  geCalendarEvents(start:Date, end:Date) {
+  getCalendarEvents(start:Date, end:Date) {
       return this._http.get("/api/GetCalendarEvents?&start="+start+"&end="+end)
       .map(result=>result.json())
       .map(items => { items.forEach(element => {
