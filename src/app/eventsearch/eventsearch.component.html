@@ -8,27 +8,26 @@
             </select>
                   
         </td>
+    <tr>
+        <td><label class="label">Category:</label></td>
+        <td><select id="cboCategorySel" name="cboCategorySel" [(ngModel)]="selectedCategory" (ngModelChange)="onChange($event)" >
+                <option *ngFor="let c of CategoryList" [ngValue]="c"> {{c}} </option>
+            </select>                            
+
+        </td>
+        <td><label class="label">Description:</label></td>
+        <td><input type="text" class="editor-field" name="Descrip" id="Descrip" style="width:300px;" [(ngModel)]="Descrip" /></td>
     </tr> 
     <tr>
         <td><label class="label" for="fromDate">From Date:</label></td> 
-    <td colspan="3">
-        <table>
-            <tr>
-                <td><input type="text"  name="fromDate" id="fromDate" /></td>
-                <td><label class="label">To Date:</label></td>
-                <td><input type="text" class="editor-field" name="toDate" id="toDate" style="width:85px;" /></td>
-            </tr>
-        </table>
-    </td>
+        <td>
+            <input type="text"  name="fromDate" id="fromDate" style="width:85px;" [(ngModel)]="fromDate" />
+        </td>
+        <td><label class="label">To Date:</label></td>
+        <td><input type="text" name="toDate" id="toDate" style="width:85px;" [(ngModel)]="toDate" /></td>
     </tr>
     <tr>
-        <td><label class="label">Description:</label></td>
-        <td><input type="text" class="editor-field" name="Search" id="Search" style="width:300px;" /></td>
-        <td colspan="2">&nbsp;</td>
-    </tr>
-
-    <tr>
-        <td align="center" colspan="4"><input type="button" id="btnFiliter" class="btn btn-primary" value="Filter" /></td>
+        <td align="center" colspan="4"><input (click)="filter()" type="button" id="btnFiliter" class="btn btn-primary" value="Filter" /></td>
     </tr>
 </table>
 
@@ -86,7 +85,7 @@
             <div class="row"> 
                 <div class="col-xs-6 col-sm-4" >Category</div>
                 <div class="col-xs-6 col-lg-8" >
-                        <select class="form-control" id="cboCategory" name="cboCategory" [(ngModel)]="selectedCategory" (ngModelChange)="onChange($event)" >
+                        <select class="form-control" id="cboCategory" name="cboCategory" [(ngModel)]="selectedCategory" >
                             <option *ngFor="let c of CategoryList" [ngValue]="c"> {{c}} </option>
                         </select>                            
                 </div> 

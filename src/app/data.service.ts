@@ -5,6 +5,7 @@ import 'rxjs/add/operator/toPromise';
 import { MyEvent, colors } from './Model/MyEvent';
 import { Event } from './Model/Event';
 import { Person } from './Model/Person';
+//import { userInfo } from 'os';
 
 @Injectable()
 export class DataService {
@@ -40,11 +41,44 @@ export class DataService {
     .map(result=>this.result=result.json());
   }
 
-  getEvents() {
-    return this._http.get("/api/events")
+  getEvents(UserID:number, fromDate: string, toDate: string, cat: string, descrip : string) {
+    //Restful : "/api/events/"+ UserID
+    console.log("getEvents  UserId=", UserID, "  fromDate=", fromDate, "  toDate=", toDate, "  cat=", cat, "  descrip=", descrip);
+    var rout="/api/events";
+    if (UserID!==null && UserID!=0)
+      rout+="?userid="+UserID;
+
+    if (fromDate!=null) {
+      if (rout.indexOf("?")==-1)  rout+="?"
+      rout+="&fromdate="+fromDate;
+    }
+
+    if (toDate!=null) {
+      if (rout.indexOf("?")==-1)  rout+="?"
+      rout+="&todate="+toDate;
+    }
+
+    if (cat!=null) {
+      if (rout.indexOf("?")==-1)  rout+="?"
+      rout+="&cat="+cat;
+    }
+
+    if (descrip!=null) {
+      if (rout.indexOf("?")==-1)  rout+="?"
+      rout+="&descrip="+descrip;
+    }
+
+
+    console.log("getEvents rout=", rout,);
+      
+      return this._http.get(rout)
     .map(result=>this.result=result.json());
   }
-
+  getPictures() {
+    return this._http.get("./Inetpub.json");
+    
+  }
+  
   getAddresses() {
     return this._http.get("/api/addresses")
     .map(result=>this.result=result.json().data);
@@ -59,10 +93,13 @@ export class DataService {
       return this._http.get("/api/GetCalendarEvents?&start="+start+"&end="+end)
       .map(result=>result.json())
       .map(items => { items.forEach(element => {
-            element.start = new Date(element.start);
-            element.color= colors.blue;
-            element.start.setFullYear(new Date().getFullYear()); }) 
-          return items; })
+        element.start=element.start.replace("T00","T06");
+        element.start = new Date(element.start);
+        element.color= colors.blue;
+        element.start.setFullYear(start.getFullYear()); 
+            }) 
+            return items; 
+          })
       .toPromise();
     }
 

@@ -15,12 +15,15 @@ import  * as _ from 'lodash';
 export class PersonsearchComponent implements OnInit {
   isBusy = true;
   message: string;
+  MasterPeopleDataList : Person[] = [];
   PeopleDataList : Person[] = [];
   AddressList : Address[] = [];
   pagedItems: Person[] = [];
   selectedPerson: Person;
   selectedAddress: Address;
   
+  sortColumn: string = 'Name';
+ 
   currentPage = 0;
   pageSize = 10;
   numberOfPages=2;
@@ -32,9 +35,10 @@ export class PersonsearchComponent implements OnInit {
   ngOnInit() {
     this._dataService.getUsers()
     .subscribe(res => {
-      this.PeopleDataList = res;
-      console.log("peoplelist=",this.PeopleDataList);
-      this.numberOfPages = Math.round(this.PeopleDataList.length / this.pageSize);
+      this.MasterPeopleDataList = res;
+      console.log("peoplelist=",this.MasterPeopleDataList);
+      this.numberOfPages = Math.round(this.MasterPeopleDataList.length / this.pageSize);
+      this.PeopleDataList=this.MasterPeopleDataList;
       this.setPage();
     });
 
@@ -80,6 +84,70 @@ export class PersonsearchComponent implements OnInit {
     this.selectedPerson.AddressID=this.selectedAddress._id;
     
   }
+
+filter(data){
+  let col="Name";
+  console.log("filter event=",data);
+  
+  this.PeopleDataList=this.MasterPeopleDataList;
+  this.PeopleDataList = <Person[]> _.reduce(this.PeopleDataList, function(memo, val, idx) {
+    let bracketPos=data.col.indexOf("[");
+    /*
+    console.log("filter bracketPos", bracketPos);
+    var newval="";
+    var nbrk = "";
+    if (bracketPos!=-1) {
+      newval=data.col.substr(0,bracketPos);
+      nbrk=data.col.substr(bracketPos);
+    console.log("filter newval", newval);
+    console.log("filter nbrk", nbrk);
+    let rgx = /(?<field>\w*)\[(?<idx>\d)\]\.Date/g;
+    let res = rgx.exec(data.col);
+    console.log("filter res", res);
+    let regex = new RegExp('(?<field>\w*)\[(?<idx>\d)\]\.Date',"i");
+      let mtc = data.col.match(regex);
+      console.log("filter mtc", mtc);
+
+
+    }
+    console.log("filter val[newval]", val[newval]);
+    if (val[newval].length>0) {
+    console.log("filter val[newval][0]", val[newval][0]);
+    console.log("filter val[newval][0].Date", val[newval][0].Date);
+    }
+    */
+    if (bracketPos!=-1) {
+      let nDate = new Date(data.val);
+      let newval=data.col.substr(0,bracketPos);
+      if (val[newval].length>0) {
+        console.log("SEL1 val[newval][0].Date", typeof(val[newval][0].Date));
+        console.log("SEL1 Date", typeof(nDate));
+        if (new Date(val[newval][0].Date) > nDate) {
+          console.log("SEL1 FOUND val", val);
+          memo.push(val);
+        }
+      }
+    } else {
+      if (val[data.col].toLowerCase().includes(data.val)) {
+        console.log("SEL2 FOUND val", val);
+        memo.push(val);
+      }
+    }
+    return memo;
+  }, []);
+  this.setPage();
+}
+
+ sort(data) {
+  console.log("sort event=",data);
+  this.sortColumn = data.col;
+  let sasc = 'asc';
+  if (data.desc)
+    sasc = 'desc';
+
+  this.PeopleDataList = _.orderBy(this.PeopleDataList, [this.sortColumn],[sasc]); // Use Lodash to sort array by 'name'
+  this.setPage();
+}
 
  toJSONLocal (date) {
 	  var local = new Date(date);

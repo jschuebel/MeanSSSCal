@@ -1,6 +1,6 @@
 //import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { HttpModule } from '@angular/http';
@@ -21,6 +21,9 @@ import { EventsearchComponent } from './eventsearch/eventsearch.component';
 //Must include for ngModel to be used
 import { FormsModule }   from '@angular/forms';
 import { EmailComponent } from './email/email.component';
+import { TablecolumnfilterComponent } from './tablecolumnfilter/tablecolumnfilter.component';
+import { PictureComponent } from './picture/picture.component';
+import { Windowref } from './windowref.service';
 
 const ROUTES : Routes = [
   {
@@ -32,6 +35,11 @@ const ROUTES : Routes = [
     path: 'person',
     component: PersonsearchComponent
   },
+  {
+    path: 'picture',
+    component: PictureComponent
+  },
+  
   {
     path: 'event',
     component: EventsearchComponent
@@ -61,7 +69,9 @@ const ROUTES : Routes = [
     CalendarViewComponent,
     TruncatePipe,
     EventsearchComponent,
-    EmailComponent
+    EmailComponent,
+    TablecolumnfilterComponent,
+    PictureComponent
   ],
   imports: [
     BrowserModule,
@@ -73,8 +83,9 @@ const ROUTES : Routes = [
     CalendarModule.forRoot(),
     FormsModule
   ],
-  providers: [DataService],
-  bootstrap: [AppComponent]
+  providers: [DataService, Windowref],
+  bootstrap: [AppComponent],
+  schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
 })
 export class AppModule { }
 

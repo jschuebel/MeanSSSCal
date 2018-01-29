@@ -3,21 +3,29 @@
 <button ng-disabled="isAdmin" (click)="open(content,null);">Create Person</button>
 
 <table class="table table-responsive table-striped table-hover table-condensed">
-    <tr>
-        <th>Name</th>
-        <th>Birth Date</th>
-        <th>Home Phone</th>
-        <th></th>
-    </tr>
+    <thead>
+        <tr>
+            <th  style="cursor: pointer">
+                    <app-tablecolumnfilter [ColumnName]="'Name'" [SelectedColumnName]="sortColumn" (onFilter)="filter($event);" (onSort)="sort($event);">Name</app-tablecolumnfilter>
+            </th>
+            <th  style="cursor: pointer">
+                <app-tablecolumnfilter [RequiredLength]="8" [ColumnName]="'events[0].Date'" [SelectedColumnName]="sortColumn" (onFilter)="filter($event);" (onSort)="sort($event);">Birth Date</app-tablecolumnfilter>
+            </th>
+            <th  style="cursor: pointer">
+                <app-tablecolumnfilter [ColumnName]="'Home Phone'" [SelectedColumnName]="sortColumn" (onFilter)="filter($event);" (onSort)="sort($event);">Home Phone</app-tablecolumnfilter>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
     
     <tr *ngFor="let aw of pagedItems">
       <td>{{aw.Name}}</td>
       <td>{{aw.events[0]!=null ? (aw.events[0].Date  | date) : "N/A"}}</td>
-      <td>{{aw.HomePhone}}</td>
+      <td>{{aw['Home Phone']!=null? aw['Home Phone'] : "N/A"}}</td>
       <td><button (click)="open(content, this.aw)" class="btn btn-primary btn-sm">Edit</button></td>
     </tr>
     <tr >
-      <td colspan="3" style="text-align:right">
+      <td colspan="4" style="text-align:right">
           <button ng-disabled="currentPage == 0" (click)="currentPage=currentPage-1; setPage();">
               Previous
           </button>

@@ -205,20 +205,46 @@ router.get('/users2', (req, res) => {
 
 
 // Get events
-router.get('/events', (req, res) => {
-    var startDate = new Date("1/1/0001");
-    var endDate = new Date();
-    
-    //console.log("startsecs="+ startsecs + "  endsecs="+ endsecs);
-   
-    console.log("/Events  startDate",startDate + "  endDate=", endDate);
+//Rest passing '/events/:UserID'
+//      req.params.UserID==null
 
+router.get('/events', (req, res) => {
+    var mtch = { $match : {$and:[]}  } ;
+    var dtchk = {Date: {"$gte": new Date("1/1/0001"), "$lt": new Date()}};
+    console.log("req.query", req.query);
+   
+    console.log("req.query userid",req.query.userid, "fromDate", req.query.fromdate, "toDate", req.query.todate,"cat", req.query.cat,"descrip", req.query.descrip);
+    if (req.query.userid==null || (req.query.userid!=null && req.query.userid==="0"))
+        mtch.$match.$and.push({UserID:{$ne:null}});
+    else
+        mtch.$match.$and.push({UserID:parseInt(req.query.userid)});
+
+    if (req.query.fromdate!=null)
+        mtch.$match.$and.push({Date: {"$gte": new Date(req.query.fromdate)}});
+
+    if (req.query.todate!=null)
+    mtch.$match.$and.push({Date: {"$lte": new Date(req.query.todate)}});
+
+    if (req.query.cat!=null)
+    mtch.$match.$and.push({Category:req.query.cat});
+
+    if (req.query.descrip!=null) 
+        mtch.$match.$and.push({ Description: new RegExp(req.query.descrip, "i") });
+
+    //var catchk = {Category:"Hockey"};
+    //var dtchk = {Date: {"$gte": startDate, "$lt": endDate}};
+    //var deschk = { Description: /^schuebel/i }; 
+    //var deschk = { Description: /jt/i }; 
+    //var mtch = { $match : {$and:[  {Date: {$ne:null}},{Date: {"$gte": startDate, "$lt": endDate}}]}  } ;
+    //ORIG{ $match : { $or: [ {Date: {"$gte": startDate, "$lt": endDate}}, {$and:[{Date: {$ne:null}} ,{TopicID:1}]}  ]}}, 
+    //mtch = { $match : {$and:[  {UserID:1},{Date: {"$gte": new Date("3/1/2013")}}, {Date: {"$lt": new Date("5/1/2013")}}]}  } ;
+    console.log("mtch filters=",mtch);
     connectionPerson((db) => {
         db.collection('events')
             .aggregate([
-                { $match : { $or: [ {Date: {"$gte": startDate, "$lt": endDate}}, {$and:[{Date: {$ne:null}} ,{TopicID:1}]}  ]}}, 
+                mtch,
 				{ $lookup:
-                    {
+                    { 
                       from: 'people',
                       localField: 'UserID',
                       foreignField: '_id',
@@ -229,7 +255,8 @@ router.get('/events', (req, res) => {
 			], function(err, eventList) {
 			if (err) throw err;
 			db.close();
-			res.json(eventList);
+            //console.log("eventList count", eventList.length);
+            res.json(eventList);
 		  })
 	  });
 });
@@ -595,7 +622,7 @@ router.get('/GetCalendarEvents', function(req, res) {
         hldStDate.setMonth(hldStDate.getMonth() + 1);
     }
 
-    //console.log("startMonth="+ startMonth + "  endMonth="+ endMonth + "  months=" + mnths);
+    console.log("startMonth="+ startMonth + "  endMonth="+ endMonth + "  months=" + mnths);
     db.FindinCol1(mnths, startDate, endDate).then(function(items) {
         //console.info('The promise was fulfilled with items!', items);
         //Combine all the returned arrays to 1 collection

@@ -37,7 +37,7 @@ export class EmailComponent implements OnInit {
       console.log("Error from getUsers", err)
     });
 	
-    this._dataService.getEvents()
+    this._dataService.getEvents(null,null,null,null,null)
     .subscribe(res => {
       var evt = new Event();
       evt._id=-1;

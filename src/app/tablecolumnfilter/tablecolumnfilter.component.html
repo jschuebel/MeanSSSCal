@@ -1,0 +1,9 @@
+  <div class="container-fluid"> 
+      <div class="row" (click)="Sort(ColumnName)"><ng-content></ng-content><i class="fa" [ngClass]="{'fa-sort': SelectedColumnName != ColumnName, 
+                          'fa-sort-asc': (SelectedColumnName == ColumnName && !isDesc), 
+                          'fa-sort-desc': (SelectedColumnName == ColumnName && isDesc) }"
+                            aria-hidden="true"></i></div>
+      <div class="row">
+              <input type="text" data-column="1"  [(ngModel)]="searchVal" (ngModelChange)="Filter($event)"  class="form-control" placeholder="<<Search>>">
+      </div>
+  </div>

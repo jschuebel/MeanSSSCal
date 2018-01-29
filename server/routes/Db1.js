@@ -33,6 +33,17 @@ module.exports = {
         });
       }));
 
+      promises.push(new Promise(function(resolve, reject) {
+        collection.find({Date:{"$ne":null}, $where : mnths, Category:{"$ne":'Birthday'}, repeatYearly:true}).toArray(function(err, items) {
+          if (err) {
+            reject(err);
+          } else {
+            console.log("find repeating evets items count=" + items.length);
+            resolve(items);
+          }          
+        });
+      }));
+
       //Date : {"$gte": startDate, "$lt": endDate}
       //Date : {"$gte": startDate.toISOString(), "$lt": endDate.toISOString()}
       //$where : mnths

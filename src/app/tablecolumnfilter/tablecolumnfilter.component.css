@@ -1,0 +1,6 @@
+#showdiv {
+    display:none;
+}
+#showdiv.hide-div {
+    display: hidden;
+  }

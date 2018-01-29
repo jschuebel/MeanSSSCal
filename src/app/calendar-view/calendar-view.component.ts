@@ -33,12 +33,12 @@ export class CalendarViewComponent implements OnInit {
     //this.events=[];
     //this.events.push(new MyEvent('first event', colors.blue,new Date()))
     //this.events.push(new MyEvent('second', colors.blue,new Date()))
+    this.viewDate = new Date();
     this.getEvents();
   }
 
   getEvents(): void {
     //this.events = [];
-    this.viewDate = new Date();
     var firstDay = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), 1);
     var lastDay = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth() + 1, 0);
     console.log("firstDay=", firstDay);
@@ -47,7 +47,7 @@ export class CalendarViewComponent implements OnInit {
         this._dataService.getCalendarEvents(firstDay, lastDay)
           .then(res => { 
             console.log("returned from getCalendarEvents");
-            console.log("result geteents",res);
+            console.log("result getCalendarEvents res",res);
             this.events = res;
             this.events.forEach((ritm) => {
                 if ((new Date(ritm.start)).getDay()===this.viewDate.getDay())
@@ -92,7 +92,8 @@ export class CalendarViewComponent implements OnInit {
           this.activeDayIsOpen = true;
           else
           this.activeDayIsOpen = false;
-        this.viewDate = date;         // console.log("dayclicked viewDate=" + this.viewDate);
+        this.viewDate = date;         
+         console.log("dayclicked viewDate=" + this.viewDate);
           //    }
     //  }
     }
