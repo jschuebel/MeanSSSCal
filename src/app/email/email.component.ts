@@ -27,7 +27,7 @@ export class EmailComponent implements OnInit {
 
   ngOnInit() {
 
-   this.message= "SelectedEmailIDList len=" + this.SelectedEmailIDList.length;
+  // this.message= "SelectedEmailIDList len=" + this.SelectedEmailIDList.length;
     this._dataService.getUsers()
     .subscribe(res => {
       this.PeopleList = res;
@@ -45,14 +45,25 @@ export class EmailComponent implements OnInit {
       evt.Date = new Date();
       res.unshift(evt)
       this.SelectedEvent=evt;
-      
+     
       res.forEach(item => {
 //        console.log("item.Description", item.Description, "  Date", item.Date);
+        var len =0;
+        var newstring="";
+        if  (item.Description==null || (item.Description!=null && item.Description.trim().length==0)) {
+          newstring=(item.Topic==null?"N/A":item.eventperson[0].Name + " " + item.Topic.replace(/[\n\t]/g,'    ')).trim();
+          len = newstring.length;
+        }
+        else {
+          newstring=item.Description.replace(/[\n\t]/g,'    ').substring(0,25).trim();
+          len = newstring.length;
+        }
+        len = (len>25)?25:len;
+        var padd = new Array(27-len)
+        var padds = padd.join("&nbsp;");
         if (item._id!=-1)
-          item.DisplayOnly =  ((item.Description==null || (item.Description!=null && item.Description.trim().length==0))?
-                (item.Topic==null?"N/A":item.Topic):item.Description.substring(0,25)) 
-                    + "......" + (item.Date==null?"N/A":this.toJSONLocal(item.Date));
-        console.log("item.DisplayOnly", item.DisplayOnly);
+          item.DisplayOnly =  newstring.replace(/ /g,'&nbsp;') + padds + (item.Date==null?"N/A":this.toJSONLocal(item.Date));
+        console.log("item.DisplayOnly", item.DisplayOnly,"len", len);
       });
 
       this.EventDataList= _.orderBy(res, [evt => evt.DisplayOnly], ['asc']);
@@ -176,14 +187,16 @@ UpdateSelection() {
 */
 
 Save() {
-  this._dataService.saveEmails(this.SelectedEvent)
+   this._dataService.saveEmails(this.SelectedEvent)
   .subscribe(res => {
     console.log("Save res =",res);
     this.message = res.data.status;
   },
   err => {
     console.log("Error from getUsers", err)
-  });
+    if (err.status===403)
+    this.message = "Event Access: " + err.statusText;
+});
 
 }
 

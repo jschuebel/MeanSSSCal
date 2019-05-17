@@ -46,7 +46,7 @@ export class PersonsearchComponent implements OnInit {
     if (storedList==null) {
       this._dataService.getAddresses()
       .subscribe(res => {
-        this.AddressList = res;
+        this.AddressList = res.data;
         console.log("AddressList=",this.AddressList);
         localStorage.setItem("AddressList", JSON.stringify(this.AddressList));
       });
@@ -166,8 +166,9 @@ filter(data){
 	}
 	else
 	{
-    if (person.events[0].Date!=null)
+    if (person.events[0]!=null && person.events[0].Date!=null)
       person.events[0].Date = this.toJSONLocal(person.events[0].Date);
+    else person.events[0] = new Event();
 
 		this.message = "here is the select id = " + person._id;
     this.selectedPerson=person;
@@ -204,19 +205,54 @@ filter(data){
     }
   }
   
-  
+  test() {
+    this._dataService.testmessage()
+    .subscribe(res => {
+      console.log("back from api test");
+      console.log("test Token =",res);
+      this.message = "finished test! user=" + res.authData.user.scope; //.roles;
+    },
+    err => {
+      console.log("Error from test", err)
+      if (err.status===403)
+        this.message = "Test Access: " + err.statusText;
+    });
+  }
+  Logout() {
+    localStorage.removeItem("currToken");
+  }
+
+  Login() {
+    let np = new Person();
+    np.Name="jschuebel";
+    console.log("Login(person)=",np);
+    this._dataService.login(np)
+    .subscribe(res => {
+      console.log("back from user");
+      console.log("Login Token =",res);
+
+      localStorage.setItem("currToken", res.token);
+      this.message = "Login Access: Granted!";
+    },
+    err => {
+      console.log("Error from Login", err)
+    });
+  }
+
   Save() {
+    this.message = "";
     console.log("Save(person)=",this.selectedPerson);
     this._dataService.savePerson(this.selectedPerson)
     .subscribe(res => {
       console.log("back from user");
       console.log("Save res =",res);
-      this.message = res.status;
+      this.closeResult = res.data.status;
     },
     err => {
       console.log("Error from Save", err)
-    });
-  
+      if (err.status===403)
+      this.message = "Save Access: " + err.statusText;
+  });
   }
 
 }

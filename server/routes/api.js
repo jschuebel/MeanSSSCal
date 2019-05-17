@@ -3,6 +3,8 @@ const router = express.Router();
 const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID;
 const db = require('./db1');
+const lodash = require('lodash');    
+const jwt = require('jsonwebtoken');
 
 // Connect
 const connectionPerson = (closure) => {
@@ -69,9 +71,65 @@ function updateUser(db, user) {
     });
   }
   
+router.post('/login', function(req, res) {
+    console.log("login hit");
+    console.log("req.body",req.body);    //body to json from a post
+    console.log("req.query", req.query);
 
+    var hldUser = JSON.parse(JSON.stringify(req.body.person));
+    console.log("hldUser",hldUser);
 
-router.post('/user', function(req, res) {
+    const user = {
+        scope:'admin',
+        username: hldUser.Name,
+        roles:'user'
+    }
+
+    jwt.sign({user:user}, 'mytestkey', (err,token) => {
+        res.json({
+            token:token
+        });
+    });
+ 
+});
+
+//http://www.advancesharp.com/blog/1237/angular-6-web-api-2-bearer-token-authentication-add-to-header-with-httpinterceptor
+//https://www.youtube.com/watch?v=7nafaH9SddU&t=674s
+// Verify Token
+function verifyToken(req, res, next) {
+    // Get auth header value
+    const bearerHeader = req.headers['authorization'];
+    // Check if bearer is undefined
+    if(typeof bearerHeader !== 'undefined') {
+      // Split at the space
+      const bearer = bearerHeader.split(' ');
+      // Get token from array
+      const bearerToken = bearer[1];
+      // Set the token
+      req.token = bearerToken;
+      // Next middleware
+      next();
+    } else {
+      // Forbidden
+      res.sendStatus(403);
+    }
+  
+  }
+router.post('/test', verifyToken, (req, res) => {  
+    console.log('hit api post test');
+    jwt.verify(req.token, 'mytestkey', (err, authData) => {
+      if(err) {
+        res.sendStatus(403);
+      } else {
+        res.json({
+          message: 'Post created...',
+          authData
+        });
+      }
+    });
+  });
+
+router.post('/user', verifyToken, function(req, res) {
     //console.log("req.body",req.body);    //body to json from a post
     //console.log("req.query", req.query);
 
@@ -89,6 +147,7 @@ router.post('/user', function(req, res) {
     /*make sure the date is not a string.
         req.body.event.createdate = new Date(req.body.event.createdate);
     */    
+
     connectionPerson((db) => {
 		Promise.all([
            updateUser(db,hldUser),
@@ -256,6 +315,10 @@ router.get('/events', (req, res) => {
 			if (err) throw err;
 			db.close();
             //console.log("eventList count", eventList.length);
+            lodash.remove(eventList, function (selVal) {
+                return (selVal.Date===null);
+              });
+        
             res.json(eventList);
 		  })
 	  });
@@ -280,7 +343,7 @@ router.get('/addresses', (req, res) => {
 });
 
 
-router.post('/event', function(req, res) {
+router.post('/event', verifyToken, function(req, res) {
     console.log("post event");
     //console.log("req.body",req.body);    //body to json from a post
     //console.log("req.query", req.query);
@@ -289,13 +352,12 @@ router.post('/event', function(req, res) {
     req.body.event.Date = new Date(req.body.event.Date);
     req.body.event.createdate = new Date(req.body.event.createdate);
     console.log("req.body.event",req.body.event);
-    
     connectionPerson((db) => {
         db.collection('events')
         updateEvent(db, req.body.event).then(() => { 
             db.close();
             console.log("User Saved evtobj=",req.body);
-            response.data = { status:"event saved", person:req.body};
+            response.data = { status:"Event Saved", person:req.body};
             res.json(response);
         })
         .catch(err => {
@@ -304,20 +366,18 @@ router.post('/event', function(req, res) {
             sendError(err, evtobj);
         });
     });
-    
 });
 
-router.post('/eventemail', function(req, res) {
+router.post('/eventemail', verifyToken, function(req, res) {
     console.log("req.body",req.body);    //body to json from a post
 //    console.log("req.query", req.query);
-
     connectionPerson((db) => {
         db.collection('events')
             .update({_id:req.body.id}, { $set : {'Emails': req.body.Emails}})
             .then(() => {
                 db.close();
                 console.log("Event Saved",req.body.id);
-                response.data = { status:"event saved"};
+                response.data = { status:"Email Event Saved"};
                 res.json(response);
             })
             .catch((err) => {

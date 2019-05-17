@@ -1,8 +1,18 @@
 import { Injectable } from '@angular/core';
+/*
 import { Http, Headers, RequestOptions } from '@angular/http';
+import {
+  HttpClient, HttpEvent, HttpEventType, HttpProgressEvent,
+  HttpRequest, HttpResponse, HttpErrorResponse
+} from '@angular/common/http';
+*/
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { Observable } from 'rxjs/Observable';
+
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/toPromise';
 import { MyEvent, colors } from './Model/MyEvent';
+import { Address } from './Model/Address';
 import { Event } from './Model/Event';
 import { Person } from './Model/Person';
 //import { userInfo } from 'os';
@@ -12,34 +22,66 @@ export class DataService {
 	result:any;
 	result2:any;
   
-  constructor(private _http: Http) { }
+  constructor(private _http: HttpClient) { }
+
+  login(person : Person ) {
+    var hldperson = JSON.parse(JSON.stringify(person));
+    return this._http.post<any>("/api/login",{person:person});
+     //.map(result=>this.result=result.json().data);
+  }
+
+  //https://blog.angularindepth.com/the-new-angular-httpclient-api-9e5c85fe3361
+  //https://angular.io/guide/http  
+  testmessage() {
+    /* Manual addition of header ****
+    let currTokenVal:string = localStorage.getItem("currToken");
+
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': 'Bearer ' + currTokenVal
+      })
+      };
+    return this._http.post<any>("/api/test", {}, httpOptions);
+      */
+     return this._http.post<any>("/api/test", {});
+    
+
+    /* pre-v7.0
+    var headers = new Headers();
+    let currTokenVal:string = localStorage.getItem("currToken");
+
+    headers.append('Authorization', 'Bearer ' + currTokenVal);
+    headers.append('Content-Type', 'application/json');
+
+    return this._http2.post("/api/test",{})
+     .map(result=>this.result=result.json().data);
+    */
+     }
 
   
-  saveEmails(event : Event ) {
-    return this._http.post("/api/eventemail",{ id:event._id, Emails: event.Emails})
-    .map(result=>this.result=result.json());
-//    .map(result=>this.result=result.json().data);
+  saveEmails(event : Event ) : any {
+    return this._http.post("/api/eventemail",{ id:event._id, Emails: event.Emails});
+    //.map(result=>this.result=result.json().data);
   }
 
   
   savePerson(person : Person ) {
     var hldperson = JSON.parse(JSON.stringify(person));
-    return this._http.post("/api/user",{ person: person})
-    .map(result=>this.result=result.json().data);
+    return this._http.post<any>("/api/user",{ person: person});//.map(result=>this.result=result.json().data);
   }
 
   getUsers() {
-    return this._http.get("/api/users")
-    .map(result=>this.result=result.json());
+    return this._http.get<Array<Person>>("/api/users");
   }
 
   saveEvent(event : Event ) {
     //deep clone and remove the extra information
     var hldevent = JSON.parse(JSON.stringify(event));
     delete hldevent.eventperson;
-     return this._http.post("/api/event",{ event: hldevent})
-    .map(result=>this.result=result.json());
-  }
+     return this._http.post<any>("/api/event",{ event: hldevent});
+//      .map(result=>this.result=result.json().data);
+}
 
   getEvents(UserID:number, fromDate: string, toDate: string, cat: string, descrip : string) {
     //Restful : "/api/events/"+ UserID
@@ -71,26 +113,29 @@ export class DataService {
 
     console.log("getEvents rout=", rout,);
       
-      return this._http.get(rout)
-    .map(result=>this.result=result.json());
+      return this._http.get<Array<Event>>(rout);
   }
-  getPictures() {
-    return this._http.get("./Inetpub.json");
-    
+
+  
+  getPictures()  {
+    //force result to string
+      return this._http.get("./Inetpub.json", {responseType: 'text'});
   }
   
   getAddresses() {
-    return this._http.get("/api/addresses")
-    .map(result=>this.result=result.json().data);
+    return this._http.get<any>("/api/addresses");
   }
   
-  getCategories() {
-    return this._http.get("/api/categories")
-    .map(result=>this.result=result.json().data);
+  getCategories()   {
+    return this._http.get<any>("/api/categories");//.map(result=>this.result=result.json().data);
   }
 
   getCalendarEvents(start:Date, end:Date) {
-      return this._http.get("/api/GetCalendarEvents?&start="+start+"&end="+end)
+    console.log("getCalendarEvents start=", start, ' end=', end);
+    return this._http.get<Array<any>>("/api/GetCalendarEvents?&start="+start+"&end="+end).toPromise();
+    
+    /*
+    return this._http2.get("/api/GetCalendarEvents?&start="+start+"&end="+end)
       .map(result=>result.json())
       .map(items => { items.forEach(element => {
         element.start=element.start.replace("T00","T06");
@@ -101,6 +146,7 @@ export class DataService {
             return items; 
           })
       .toPromise();
+      */
     }
 
 

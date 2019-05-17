@@ -1,6 +1,9 @@
 <div class="text-danger" *ngIf="message">{{message}}</div>
 <div >closeResult={{closeResult}}</div>
 <button ng-disabled="isAdmin" (click)="open(content,null);">Create Person</button>
+<button type="button" class="btn btn-outline-dark" (click)="Login()">login</button>
+<button type="button" class="btn btn-outline-dark" (click)="test()">test message</button>
+<button type="button" class="btn btn-outline-dark" (click)="Logout()">logout</button>
 
 <table class="table table-responsive table-striped table-hover table-condensed">
     <thead>

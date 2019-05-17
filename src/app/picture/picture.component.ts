@@ -83,9 +83,10 @@ export class PictureComponent implements OnInit {
       console.log("initLoad getPictures");
       this._dataService.getPictures()
       .subscribe(res => {
-        console.log("getPictures res=",res);
-        this.tabData = res.json();
-        localStorage.setItem("SSSPics", res.text());
+        //console.log("getPictures res=",res);
+        //console.log("getPictures res type", typeof(res));
+        this.tabData = JSON.parse(res);
+        localStorage.setItem("SSSPics", res);
         this.hlddir.push(this.tabData);
         this.updateTable(this.tabData);
       },

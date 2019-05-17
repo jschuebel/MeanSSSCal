@@ -3,7 +3,9 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-import { HttpModule } from '@angular/http';
+//import { HttpModule } from '@angular/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 //import {CalendarComponent} from "ap-angular2-fullcalendar/src/calendar/calendar";
 import { CalendarModule } from 'angular-calendar';
@@ -24,6 +26,7 @@ import { EmailComponent } from './email/email.component';
 import { TablecolumnfilterComponent } from './tablecolumnfilter/tablecolumnfilter.component';
 import { PictureComponent } from './picture/picture.component';
 import { Windowref } from './windowref.service';
+import { AuthInterceptor } from './auth-interceptor';
 
 const ROUTES : Routes = [
   {
@@ -78,12 +81,14 @@ const ROUTES : Routes = [
     CommonModule,
     BrowserAnimationsModule,
     NgbModule.forRoot(),
-	  HttpModule,
+    //HttpModule,
+    HttpClientModule,
     RouterModule.forRoot(ROUTES),
     CalendarModule.forRoot(),
     FormsModule
   ],
-  providers: [DataService, Windowref],
+  providers: [DataService, Windowref
+        ,{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   bootstrap: [AppComponent],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
 })

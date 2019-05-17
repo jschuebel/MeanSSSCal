@@ -55,7 +55,7 @@ export class EventsearchComponent implements OnInit {
 
     this._dataService.getCategories()
     .subscribe(res => {
-      this.CategoryList = res;
+      this.CategoryList = res.data;
       //console.log("CategoryList=",this.CategoryList);
     });
 
@@ -172,6 +172,8 @@ export class EventsearchComponent implements OnInit {
     },
     err => {
       console.log("Error from Save", err)
+      if (err.status===403)
+        this.message = "Event Access: " + err.statusText;
     });
   
   }
