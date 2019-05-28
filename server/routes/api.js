@@ -78,19 +78,21 @@ router.post('/login', function(req, res) {
 
     var hldUser = JSON.parse(JSON.stringify(req.body.person));
     console.log("hldUser",hldUser);
+    if (hldUser.Name!=="jschuebel" && hldUser.Pager!=="mypass")
+        res.sendStatus(403);
+    else {
+            const user = {
+                scope:'admin',
+                username: hldUser.Name,
+                roles:'user'
+            }
 
-    const user = {
-        scope:'admin',
-        username: hldUser.Name,
-        roles:'user'
-    }
-
-    jwt.sign({user:user}, 'mytestkey', (err,token) => {
-        res.json({
-            token:token
-        });
-    });
- 
+            jwt.sign({user:user}, 'mytestkey', (err,token) => {
+                res.json({
+                    token:token
+                });
+            });
+        }
 });
 
 //http://www.advancesharp.com/blog/1237/angular-6-web-api-2-bearer-token-authentication-add-to-header-with-httpinterceptor

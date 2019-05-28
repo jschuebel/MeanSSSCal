@@ -1,9 +1,12 @@
 <div class="text-danger" *ngIf="message">{{message}}</div>
-<div >closeResult={{closeResult}}</div>
-<button ng-disabled="isAdmin" (click)="open(content,null);">Create Person</button>
-<button type="button" class="btn btn-outline-dark" (click)="Login()">login</button>
-<button type="button" class="btn btn-outline-dark" (click)="test()">test message</button>
-<button type="button" class="btn btn-outline-dark" (click)="Logout()">logout</button>
+<div >{{closeResult}}</div>
+<!-- Added  role="button" so finger pointer shows
+    [disabled]=bool is Angular 2+
+-->
+<button type="button" role="button" class="btn btn-outline-dark" [disabled]="!isLoggedIn" (click)="openPerson(EditPersonPop,null);">Create Person</button>
+<button type="button" role="button" class="btn btn-outline-dark" (click)="openLogin(LoginPop)">login</button>
+<button type="button" role="button" class="btn btn-outline-dark" (click)="test()">test message</button>
+<button type="button" role="button" class="btn btn-outline-dark" (click)="Logout()">logout</button>
 
 <table class="table table-responsive table-striped table-hover table-condensed">
     <thead>
@@ -25,22 +28,56 @@
       <td>{{aw.Name}}</td>
       <td>{{aw.events[0]!=null ? (aw.events[0].Date  | date) : "N/A"}}</td>
       <td>{{aw['Home Phone']!=null? aw['Home Phone'] : "N/A"}}</td>
-      <td><button (click)="open(content, this.aw)" class="btn btn-primary btn-sm">Edit</button></td>
+      <td><button role="button" (click)="openPerson(EditPersonPop, this.aw)" class="btn btn-primary btn-sm">Edit</button></td>
     </tr>
     <tr >
       <td colspan="4" style="text-align:right">
-          <button ng-disabled="currentPage == 0" (click)="currentPage=currentPage-1; setPage();">
+          <button role="button" ng-disabled="currentPage == 0" (click)="currentPage=currentPage-1; setPage();">
               Previous
           </button>
           {{currentPage+1}}/{{numberOfPages}}
-          <button ng-disabled="currentPage >= numberOfPages - 1" (click)="currentPage=currentPage+1; setPage();">
+          <button role="button" ng-disabled="currentPage >= numberOfPages - 1" (click)="currentPage=currentPage+1; setPage();">
               Next
         </button>
       </td>
     </tr>
 </table>
 
-<ng-template #content let-c="close" let-d="dismiss">
+
+<ng-template #LoginPop let-c="close" let-d="dismiss">
+    <div class="modal-header">
+      <h4 class="modal-title">Modal title</h4>
+      <button role="button" type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <form id="edit-book-form" action="/SSSCal/Person/HandlePopForm" class="container-fluid"> 
+            <div class="row"> 
+                    <div class="col-xs-6 col-sm-4">
+                        <label class="label2" for="UserName">User Name</label>
+                    </div>
+                    <div class="col-xs-6 col-lg-8">
+                            <input class="form-control" type="text" name="UserName" id="UserName" [(ngModel)]="loginPerson.Name" /> 
+                    </div>
+            </div>  
+            <div class="row"> 
+                    <div class="col-xs-6 col-sm-4" >
+                            <label  class="label2" for="password">Password</label>
+                    </div>
+                    <div class="col-xs-6 col-lg-8" >
+                            <input class="form-control" type="text" name="password" id="password"  [(ngModel)]="loginPerson.Pager"/> 
+                    </div>
+            </div>  
+        </form> 
+    </div>
+   <div class="modal-footer">
+       <button role="button" type="button" class="btn btn-outline-dark" (click)="c('Login')" >Login</button>
+       <button role="button" type="button" class="btn btn-outline-dark" (click)="c('Close click')">Close</button>
+   </div>
+ </ng-template>
+
+<ng-template #EditPersonPop let-c="close" let-d="dismiss">
     <div class="modal-header">
       <h4 class="modal-title">Modal title</h4>
       <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
@@ -158,8 +195,8 @@
         </form> 
      </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-outline-dark" (click)="c('Saving')">Save</button>
-        <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">Close</button>
+        <button role="button" type="button" class="btn btn-outline-dark" (click)="c('Saving')" *ngIf="isLoggedIn">Save</button>
+        <button role="button" type="button" class="btn btn-outline-dark" (click)="c('Close click')">Close</button>
     </div>
   </ng-template>
   

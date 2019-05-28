@@ -14,6 +14,7 @@ import  * as _ from 'lodash';
 })
 export class PersonsearchComponent implements OnInit {
   isBusy = true;
+  isLoggedIn = false;
   message: string;
   MasterPeopleDataList : Person[] = [];
   PeopleDataList : Person[] = [];
@@ -21,6 +22,7 @@ export class PersonsearchComponent implements OnInit {
   pagedItems: Person[] = [];
   selectedPerson: Person;
   selectedAddress: Address;
+  loginPerson: Person;
   
   sortColumn: string = 'Name';
  
@@ -28,11 +30,21 @@ export class PersonsearchComponent implements OnInit {
   pageSize = 10;
   numberOfPages=2;
   closeResult: string;
-  isAdmin=true;
   
   constructor(private _dataService:DataService, private modalService: NgbModal) { }
 
   ngOnInit() {
+
+    //Create space for a login person
+    this.loginPerson = new Person();
+    
+    let currTokenVal:string = localStorage.getItem("currToken");
+    if (currTokenVal!==null) 
+      this.isLoggedIn = true;
+    else 
+      this.isLoggedIn = false;
+      console.log("isLoggedIn=",this.isLoggedIn);
+ 
     this._dataService.getUsers()
     .subscribe(res => {
       this.MasterPeopleDataList = res;
@@ -156,7 +168,7 @@ filter(data){
   }
   
 //https://ng-bootstrap.github.io/#/components/modal/examples
-  open(content, person) {
+  openPerson(content, person) {
     console.log("open(person)=",person);
     if (person==null) {
       person = new Person();
@@ -223,21 +235,37 @@ filter(data){
   }
 
   Login() {
-    let np = new Person();
-    np.Name="jschuebel";
-    console.log("Login(person)=",np);
-    this._dataService.login(np)
+    console.log("Login(person)=",this.loginPerson);
+    this._dataService.login(this.loginPerson)
     .subscribe(res => {
       console.log("back from user");
       console.log("Login Token =",res);
 
       localStorage.setItem("currToken", res.token);
-      this.message = "Login Access: Granted!";
+      this.message = "";
+      this.closeResult ="Login Access: Granted!";
     },
     err => {
       console.log("Error from Login", err)
+      if (err.status===403)
+        this.message = "Login Failed! Access: " + err.statusText;
+        this.closeResult ="";
     });
   }
+
+  openLogin(content) {
+    this.modalService.open(content).result.then((result) => {
+      this.closeResult = `Closed with: ${result}`;
+      console.log("openLogin result=", result);
+      if (result=="Login") {
+        //console.log("loginPerson",this.loginPerson);
+        this.Login();
+      }
+    }, (reason) => {
+      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+    });
+  }
+
 
   Save() {
     this.message = "";
