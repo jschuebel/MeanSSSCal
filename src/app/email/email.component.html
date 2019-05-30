@@ -9,7 +9,7 @@
 <div class="row">
         &nbsp;
 </div>
-<div class="row justify-content-md-center" style="border: 3px solid red;">
+<div class="row justify-content-md-center">
         <div class="col col-md-auto">People</div>
         <div class="col col-md-2"></div>
         <div class="col col-md-auto">Selected People</div>
@@ -23,19 +23,19 @@
             </div>
             <div class="col col-md-2">
                 <div class="row justify-content-md-center">
-                                <button (click)="Move2SELPople();" class="btn btn-primary btn-sm"><i class="fa fa-angle-right"></i></button>
+                                <button (click)="Move2SELPople();" [disabled]="!isLoggedIn" class="btn btn-primary btn-sm"><i class="fa fa-angle-right"></i></button>
                 </div>
                 <div class="row justify-content-md-center">
                         &nbsp;
                 </div>
                 <div class="row justify-content-md-center">
-                                <button (click)="Move2Pople();" class="btn btn-primary btn-sm"><i class="fa fa-angle-left"></i></button>
+                                <button (click)="Move2Pople();" [disabled]="!isLoggedIn" class="btn btn-primary btn-sm"><i class="fa fa-angle-left"></i></button>
                         </div>
                 <div class="row justify-content-md-center">
                         &nbsp;
                 </div>
                 <div class="row justify-content-md-center">
-                        <button [disabled]="SelectedEmailIDList.length == 0"  (click)="Save();" class="btn btn-primary btn-sm">Save</button>
+                        <button [disabled]="SelectedEmailIDList.length == 0" *ngIf="isLoggedIn"  (click)="Save();" class="btn btn-primary btn-sm">Save</button>
                 </div>
             </div>
             <div class="col col-md-auto">

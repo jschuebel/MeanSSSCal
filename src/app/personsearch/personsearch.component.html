@@ -4,9 +4,6 @@
     [disabled]=bool is Angular 2+
 -->
 <button type="button" role="button" class="btn btn-outline-dark" [disabled]="!isLoggedIn" (click)="openPerson(EditPersonPop,null);">Create Person</button>
-<button type="button" role="button" class="btn btn-outline-dark" (click)="openLogin(LoginPop)">login</button>
-<button type="button" role="button" class="btn btn-outline-dark" (click)="test()">test message</button>
-<button type="button" role="button" class="btn btn-outline-dark" (click)="Logout()">logout</button>
 
 <table class="table table-responsive table-striped table-hover table-condensed">
     <thead>
@@ -44,38 +41,7 @@
 </table>
 
 
-<ng-template #LoginPop let-c="close" let-d="dismiss">
-    <div class="modal-header">
-      <h4 class="modal-title">Modal title</h4>
-      <button role="button" type="button" class="close" aria-label="Close" (click)="d('Cross click')">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <div class="modal-body">
-        <form id="edit-book-form" action="/SSSCal/Person/HandlePopForm" class="container-fluid"> 
-            <div class="row"> 
-                    <div class="col-xs-6 col-sm-4">
-                        <label class="label2" for="UserName">User Name</label>
-                    </div>
-                    <div class="col-xs-6 col-lg-8">
-                            <input class="form-control" type="text" name="UserName" id="UserName" [(ngModel)]="loginPerson.Name" /> 
-                    </div>
-            </div>  
-            <div class="row"> 
-                    <div class="col-xs-6 col-sm-4" >
-                            <label  class="label2" for="password">Password</label>
-                    </div>
-                    <div class="col-xs-6 col-lg-8" >
-                            <input class="form-control" type="text" name="password" id="password"  [(ngModel)]="loginPerson.Pager"/> 
-                    </div>
-            </div>  
-        </form> 
-    </div>
-   <div class="modal-footer">
-       <button role="button" type="button" class="btn btn-outline-dark" (click)="c('Login')" >Login</button>
-       <button role="button" type="button" class="btn btn-outline-dark" (click)="c('Close click')">Close</button>
-   </div>
- </ng-template>
+
 
 <ng-template #EditPersonPop let-c="close" let-d="dismiss">
     <div class="modal-header">

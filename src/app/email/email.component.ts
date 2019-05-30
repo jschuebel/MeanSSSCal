@@ -1,8 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { DataService } from '../data.service';
+import { AuthService } from '../auth.service'
 import { Person } from '../Model/Person';
 import { Event } from '../Model/Event';
 import  * as _ from 'lodash';
+import { Subscription } from 'rxjs/Subscription';
 
 
 //http://plnkr.co/edit/WHzjIQqbg7SrneAIR2wS?p=preview
@@ -14,6 +16,7 @@ import  * as _ from 'lodash';
 export class EmailComponent implements OnInit {
   @ViewChild('cboPeople') selectElRef;
   @ViewChild('cboSELPeople') selectSELElRef;
+  private subscription: Subscription;
   PeopleList : Person[] = [];
   UnSelectedEmailList : Person[] = [];
   SelectedEmailList : Person[] = [];
@@ -21,12 +24,23 @@ export class EmailComponent implements OnInit {
   SelectedEvent : Event;
   EventDataList : Event[] = [];
   message = "";
-  
+  isLoggedIn = false;
+ 
 
-  constructor(private _dataService:DataService) { }
+  constructor(private _dataService:DataService,
+              private _authService:AuthService) { }
 
   ngOnInit() {
-
+    this.subscription = this._authService.notifyObservable$.subscribe((res) => {
+      if (res.hasOwnProperty('option')) {
+//        console.log(res.option);
+        // perform your other action from here
+        this.isLoggedIn = this._authService.isAuthenticated();
+  
+      }
+    });
+    this.isLoggedIn = this._authService.isAuthenticated();
+  
   // this.message= "SelectedEmailIDList len=" + this.SelectedEmailIDList.length;
     this._dataService.getUsers()
     .subscribe(res => {

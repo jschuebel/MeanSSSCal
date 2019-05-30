@@ -78,13 +78,13 @@ router.post('/login', function(req, res) {
 
     var hldUser = JSON.parse(JSON.stringify(req.body.person));
     console.log("hldUser",hldUser);
-    if (hldUser.Name!=="jschuebel" && hldUser.Pager!=="mypass")
+    if (hldUser.Name!=="jschuebel" || hldUser.Pager!=="mypass")
         res.sendStatus(403);
     else {
             const user = {
-                scope:'admin',
+                scope:'System',
                 username: hldUser.Name,
-                roles:'user'
+                roles:['admin', 'user']
             }
 
             jwt.sign({user:user}, 'mytestkey', (err,token) => {
@@ -117,15 +117,16 @@ function verifyToken(req, res, next) {
     }
   
   }
-router.post('/test', verifyToken, (req, res) => {  
-    console.log('hit api post test');
+router.post('/loggeduser', verifyToken, (req, res) => {  
+    console.log('hit api post loggeduser');
     jwt.verify(req.token, 'mytestkey', (err, authData) => {
       if(err) {
         res.sendStatus(403);
       } else {
         res.json({
           message: 'Post created...',
-          authData
+          username: authData.user.username,
+          roles:authData.user.roles
         });
       }
     });

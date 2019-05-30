@@ -32,7 +32,7 @@ export class DataService {
 
   //https://blog.angularindepth.com/the-new-angular-httpclient-api-9e5c85fe3361
   //https://angular.io/guide/http  
-  testmessage() {
+  loggeduser() {
     /* Manual addition of header ****
     let currTokenVal:string = localStorage.getItem("currToken");
 
@@ -44,7 +44,7 @@ export class DataService {
       };
     return this._http.post<any>("/api/test", {}, httpOptions);
       */
-     return this._http.post<any>("/api/test", {});
+     return this._http.post<any>("/api/loggeduser", {});
     
 
     /* pre-v7.0

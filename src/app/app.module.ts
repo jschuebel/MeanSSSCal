@@ -13,6 +13,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 
 import { DataService } from './data.service';
+import { AuthService } from './auth.service'
 import { AppComponent } from './app.component';
 import { PostsComponent } from './posts/posts.component';
 import { HeaderComponent } from './header/header.component';
@@ -87,7 +88,7 @@ const ROUTES : Routes = [
     CalendarModule.forRoot(),
     FormsModule
   ],
-  providers: [DataService, Windowref
+  providers: [DataService, AuthService, Windowref
         ,{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   bootstrap: [AppComponent],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ]

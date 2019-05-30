@@ -120,7 +120,7 @@
       </form> 
    </div>
   <div class="modal-footer">
-      <button type="button" class="btn btn-outline-dark" (click)="c('Saving')">Save</button>
+      <button type="button" class="btn btn-outline-dark" (click)="c('Saving')" *ngIf="isLoggedIn">Save</button>
       <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">Close</button>
   </div>
 </ng-template>

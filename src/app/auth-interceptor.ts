@@ -2,21 +2,20 @@ import { Injectable } from '@angular/core';
 import {
   HttpEvent, HttpInterceptor, HttpHandler, HttpRequest
 } from '@angular/common/http';
-
-//import { AuthService } from '../auth.service';
+import { AuthService } from './auth.service'
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
 //    constructor(private auth: AuthService) {}
-    constructor() {}
+    constructor(private _authService:AuthService) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     // Get the auth token from the service.
     //const authToken = this.auth.getAuthorizationToken();
-    let currTokenVal:string = localStorage.getItem("currToken");
+    let currTokenVal:string = this._authService.getToken();
     if (currTokenVal!==null) {
-    const  authToken:string = 'Bearer ' + localStorage.getItem("currToken");
+    const  authToken:string = 'Bearer ' + currTokenVal;
 
     /*
     * The verbose way:

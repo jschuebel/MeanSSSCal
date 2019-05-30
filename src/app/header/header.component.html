@@ -11,8 +11,46 @@
             <li class="nav-item"><a (click)="setActive('person')" class="{{getActive('person')}}" routerLink="/person">Edit People</a></li>
             <li class="nav-item"><a (click)="setActive('event')" class="{{getActive('event')}}" routerLink="/event">Edit Events</a></li>
             <li class="nav-item"><a (click)="setActive('email')" class="{{getActive('email')}}" routerLink="/email">Edit Email</a></li>
+            <li class="nav-item"><a (click)="openLogin(LoginPop);$event.stopPropagation();" class="{{getActive('login')}}"  [routerLink]=""  >Login</a></li>
+            <li class="nav-item"><a (click)="Logout();$event.stopPropagation();" class="{{getActive('logout')}}" [routerLink]="">LogOut</a></li>
+            <li class="nav-item"><a (click)="checkAuth();$event.stopPropagation();" class="{{getActive('test')}}" [routerLink]="">Test</a></li>
             </ul>
+        </div>
+        <div class="row">
+          <div class="text-warning" *ngIf="message">{{message}}</div>
         </div>
     </div>
 </div>
 
+<ng-template #LoginPop let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">Modal title</h4>
+    <button role="button" type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+      <form id="edit-book-form" action="/SSSCal/Person/HandlePopForm" class="container-fluid"> 
+          <div class="row"> 
+                  <div class="col-xs-6 col-sm-4">
+                      <label class="label2" for="txtUserName">User Name</label>
+                  </div>
+                  <div class="col-xs-6 col-lg-8">
+                          <input class="form-control" type="text" name="txtUserName" id="txtUserName" [(ngModel)]="loginPerson.Name" /> 
+                  </div>
+          </div>  
+          <div class="row"> 
+                  <div class="col-xs-6 col-sm-4" >
+                          <label  class="label2" for="password">Password</label>
+                  </div>
+                  <div class="col-xs-6 col-lg-8" >
+                          <input class="form-control" type="password" name="password" id="password"  [(ngModel)]="loginPerson.Pager"/> 
+                  </div>
+          </div>  
+      </form> 
+  </div>
+ <div class="modal-footer">
+     <button role="button" type="button" class="btn btn-outline-dark" (click)="c('Login')" >Login</button>
+     <button role="button" type="button" class="btn btn-outline-dark" (click)="c('Close click')">Close</button>
+ </div>
+</ng-template>

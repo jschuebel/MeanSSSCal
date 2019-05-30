@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from '../data.service';
+import { AuthService } from '../auth.service'
 import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 import { Address } from '../Model/Address';
 import { Person } from '../Model/Person';
 import { Event } from '../Model/Event';
 import  * as _ from 'lodash';
+import { Subscription } from 'rxjs/Subscription';
+
 
 
 @Component({
@@ -13,6 +16,7 @@ import  * as _ from 'lodash';
   styleUrls: ['./personsearch.component.css']
 })
 export class PersonsearchComponent implements OnInit {
+  private subscription: Subscription;
   isBusy = true;
   isLoggedIn = false;
   message: string;
@@ -22,7 +26,6 @@ export class PersonsearchComponent implements OnInit {
   pagedItems: Person[] = [];
   selectedPerson: Person;
   selectedAddress: Address;
-  loginPerson: Person;
   
   sortColumn: string = 'Name';
  
@@ -31,19 +34,22 @@ export class PersonsearchComponent implements OnInit {
   numberOfPages=2;
   closeResult: string;
   
-  constructor(private _dataService:DataService, private modalService: NgbModal) { }
+  constructor(private _dataService:DataService,
+            private _authService:AuthService,
+            private modalService: NgbModal) { }
 
   ngOnInit() {
+    this.subscription = this._authService.notifyObservable$.subscribe((res) => {
+      if (res.hasOwnProperty('option')) {
+//        console.log(res.option);
+        // perform your other action from here
+        this.isLoggedIn = this._authService.isAuthenticated();
+  
+      }
+    });
 
-    //Create space for a login person
-    this.loginPerson = new Person();
-    
-    let currTokenVal:string = localStorage.getItem("currToken");
-    if (currTokenVal!==null) 
-      this.isLoggedIn = true;
-    else 
-      this.isLoggedIn = false;
-      console.log("isLoggedIn=",this.isLoggedIn);
+    this.isLoggedIn = this._authService.isAuthenticated();
+    console.log("isLoggedIn=",this.isLoggedIn);
  
     this._dataService.getUsers()
     .subscribe(res => {
@@ -217,55 +223,7 @@ filter(data){
     }
   }
   
-  test() {
-    this._dataService.testmessage()
-    .subscribe(res => {
-      console.log("back from api test");
-      console.log("test Token =",res);
-      this.message = "finished test! user=" + res.authData.user.scope; //.roles;
-    },
-    err => {
-      console.log("Error from test", err)
-      if (err.status===403)
-        this.message = "Test Access: " + err.statusText;
-    });
-  }
-  Logout() {
-    localStorage.removeItem("currToken");
-  }
-
-  Login() {
-    console.log("Login(person)=",this.loginPerson);
-    this._dataService.login(this.loginPerson)
-    .subscribe(res => {
-      console.log("back from user");
-      console.log("Login Token =",res);
-
-      localStorage.setItem("currToken", res.token);
-      this.message = "";
-      this.closeResult ="Login Access: Granted!";
-    },
-    err => {
-      console.log("Error from Login", err)
-      if (err.status===403)
-        this.message = "Login Failed! Access: " + err.statusText;
-        this.closeResult ="";
-    });
-  }
-
-  openLogin(content) {
-    this.modalService.open(content).result.then((result) => {
-      this.closeResult = `Closed with: ${result}`;
-      console.log("openLogin result=", result);
-      if (result=="Login") {
-        //console.log("loginPerson",this.loginPerson);
-        this.Login();
-      }
-    }, (reason) => {
-      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-    });
-  }
-
+ 
 
   Save() {
     this.message = "";

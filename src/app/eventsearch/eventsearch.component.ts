@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from '../data.service';
+import { AuthService } from '../auth.service'
 import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
-
+import { Subscription } from 'rxjs/Subscription';
 import { Person } from '../Model/Person';
 
 @Component({
@@ -10,6 +11,8 @@ import { Person } from '../Model/Person';
   styleUrls: ['./eventsearch.component.css']
 })
 export class EventsearchComponent implements OnInit {
+  private subscription: Subscription;
+  isLoggedIn = false;
   message: string;
   Descrip: string;
   PeopleList : Person[] = [];
@@ -30,9 +33,20 @@ export class EventsearchComponent implements OnInit {
   fromDate: string;
   toDate: string;
 
-  constructor(private _dataService:DataService, private modalService: NgbModal) { }
+  constructor(private _dataService:DataService,
+            private _authService:AuthService,
+            private modalService: NgbModal) { }
 
   ngOnInit() {
+    this.subscription = this._authService.notifyObservable$.subscribe((res) => {
+      if (res.hasOwnProperty('option')) {
+//        console.log(res.option);
+        // perform your other action from here
+        this.isLoggedIn = this._authService.isAuthenticated();
+  
+      }
+    });
+    this.isLoggedIn = this._authService.isAuthenticated();
 
     this._dataService.getUsers()
     .subscribe(res => {
