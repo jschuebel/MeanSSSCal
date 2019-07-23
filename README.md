@@ -4,11 +4,11 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 ## Updates 
 
--Moved to Angular to 5.2
--Added Lodash
--Added Json Web Token security
--Used FullCanendar control
--Json parsing of picture data
+- Moved to Angular to 5.2
+- Added Lodash
+- Added Json Web Token security
+- Used FullCanendar control
+- Json parsing of picture data
 
 ## Developer
 Run `ng serve` for a dev server. Navigate to `http://localhost:3000/`. The app will automatically reload if you change any of the source files.
