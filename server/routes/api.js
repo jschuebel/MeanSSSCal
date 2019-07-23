@@ -78,16 +78,18 @@ router.post('/login', function(req, res) {
 
     var hldUser = JSON.parse(JSON.stringify(req.body.person));
     console.log("hldUser",hldUser);
-    if (hldUser.Name!=="jschuebel" || hldUser.Pager!=="mypass")
+    if (hldUser.Name!=="jim" || hldUser.Pager!=="pass")
         res.sendStatus(403);
     else {
             const user = {
                 scope:'System',
+                iss: "http://www.schuebelsoftware.com",
+                aud: "Family",
                 username: hldUser.Name,
-                roles:['admin', 'user']
+                role:['admin', 'user']
             }
 
-            jwt.sign({user:user}, 'mytestkey', (err,token) => {
+            jwt.sign(user, process.env.Audience__Secret, (err,token) => {
                 res.json({
                     token:token
                 });
@@ -119,14 +121,17 @@ function verifyToken(req, res, next) {
   }
 router.post('/loggeduser', verifyToken, (req, res) => {  
     console.log('hit api post loggeduser');
-    jwt.verify(req.token, 'mytestkey', (err, authData) => {
+    jwt.verify(req.token, process.env.Audience__Secret, (err, authData) => {
       if(err) {
         res.sendStatus(403);
       } else {
+
+        let tst = authData.role;
         res.json({
           message: 'Post created...',
-          username: authData.user.username,
-          roles:authData.user.roles
+          aud: authData.aud,
+          iss: authData.iss,
+          claims:authData.role
         });
       }
     });

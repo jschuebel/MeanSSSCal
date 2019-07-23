@@ -49,7 +49,7 @@ export class HeaderComponent implements OnInit {
     .subscribe(res => {
       console.log("back from api test");
       console.log("test Token =",res);
-      this.message = "User:" + res.username + " Role:" + res.roles[0];
+      this.message = "User:" + res.username + " Role:" + res.claims[0];
     },
     err => {
       console.log("Error from test", err)
