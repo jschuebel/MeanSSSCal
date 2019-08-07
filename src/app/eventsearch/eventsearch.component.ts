@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from '../data.service';
 import { AuthService } from '../auth.service'
-import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
+import {  NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs/Subscription';
 import { Person } from '../Model/Person';
 
@@ -145,7 +145,8 @@ export class EventsearchComponent implements OnInit {
 
   //https://ng-bootstrap.github.io/#/components/modal/examples
   open(content, event) {
-    // console.log("open(person)=",person);
+    console.log("open(event)=",event);
+    console.log("open(content)=",content);
   if (event.Date!=null)
   event.Date = this.toJSONLocal(event.Date);
 

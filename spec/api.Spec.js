@@ -39,7 +39,8 @@ describe("Testing the API Server:", function() {
 
     it("status 200", () => {
       var hldperson = JSON.parse(data.body);
-      expect(hldperson.length).toEqual(97);
+      expect(hldperson.length >= 0).toBeTruthy();
+      expect(hldperson.length).toBeGreaterThan(97);
     })
   });
   
