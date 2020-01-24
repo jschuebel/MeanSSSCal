@@ -1,6 +1,7 @@
 import { Component, OnInit,ElementRef, ViewChild, HostListener } from '@angular/core';
 import { DataService } from '../data.service';
 import { Windowref } from '../windowref.service';
+import  * as _ from 'lodash';
 
 @Component({
   selector: 'app-picture',
@@ -171,10 +172,33 @@ export class PictureComponent implements OnInit {
     
   }
 
-  FullPic(path){
-    console.log("FullPic path", path);
+  FullPic(selpath){
+    console.log("FullPic path", selpath);
+    var selFile = '';
+    //d:/inetpub/family/aquarium2008/img_0096.jpg"
+    let SelectedPics = _.reduce(this.pictures, function(memo, val, idx) {
+      console.log("SEL val.Path", val.Path);
+      let lastslash = val.Path.lastIndexOf('/');
+      if (lastslash!=-1) lastslash++;
+      let extPos = val.Path.indexOf('.');
+      if (extPos!=-1) extPos=extPos-lastslash;
+      let filename = val.Path.substr(lastslash, extPos);
+
+      if (selpath===val.Path)
+        selFile=filename;
+
+      console.log("SEL lastslash", lastslash, "extPos",extPos, "filename",filename);
+
+      memo.push(filename);
+      return memo;
+    }, []);
+
+    //console.log("SEL SelectedPics", SelectedPics.join());
+
     var nwin = this.nativeWindow.open("./PicsPage.html");
-    nwin.opener.pth2 = "http://www.schuebelsoftware.com/SSSWebAPI/api/Image?Height=&Width=&FilePath=" + path;
+    nwin.opener.SelectedPics = SelectedPics;
+    nwin.opener.SelFile=selFile;
+    nwin.opener.pth2 = "http://www.schuebelsoftware.com/SSSWebAPI/api/Image?Height=&Width=&FilePath=" + selpath;
   }
 
   ChangeMovie(path){

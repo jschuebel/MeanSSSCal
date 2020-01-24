@@ -86,6 +86,10 @@ export class HeaderComponent implements OnInit {
 
   openLogin(content) {
 
+    window.location.href="http://localhost:4000/api/login?ssoReturn=http://sss2:3000/sso/";
+
+    return;
+/*
     const modalRef = this.modalService.open(content);
     let userNameElRef = this.renderer.selectRootElement("#txtUserName");
     userNameElRef.focus();
@@ -102,6 +106,7 @@ export class HeaderComponent implements OnInit {
     }, (reason) => {
       //this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
     });
+*/    
   }
 
   private getDismissReason(reason: any): string {

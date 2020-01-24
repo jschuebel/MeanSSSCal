@@ -2,10 +2,13 @@
 
 <html>
 	<head>
- 		<script language="javascript" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script language="javascript" type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.js"></script>
+        
 		<title>Popup Pic</title>
     	<script language="JavaScript">
             var hldpath;
+            var currentPic;
 			$(window).resize(function () {
 				if (this.resizeTO) clearTimeout(this.resizeTO);
 				this.resizeTO = setTimeout(function () {
@@ -16,6 +19,71 @@
             $(window).bind('resizeEnd', function () {
                 $("#MainIMG").hide();
                 $("#lblholding").show();
+
+                
+                if (window.opener.pth2!=null)
+                    console.log('pth2 client',window.opener.pth2);
+
+                if (window.opener.SelectedPics!=null)
+                    console.log('selectedpics client',window.opener.SelectedPics);
+                    
+                if (window.opener.SelFile!=null)
+                    console.log('SelFile client',window.opener.SelFile);
+                currentPic=window.opener.SelFile;
+
+                $("#MainIMG").on("swipeleft",function(){
+
+                    for (var ps = 0; ps<window.opener.SelectedPics.length;ps++)
+                    {
+                        if (window.opener.SelectedPics[ps]===currentPic)
+                            break;
+                    }
+                    
+                    console.log('ps swipeLEFT',ps);
+                    if (ps+1>=window.opener.SelectedPics.length) ps=-1;
+                    console.log('ps swipeRIGHT2',ps);
+                    let nhldpath = window.opener.pth2;
+                    nhldpath = nhldpath.replace("?Height=", "?Height=" + $(window).height());
+                    nhldpath = nhldpath.replace("&Width=", "&Width=" + $(window).width());
+                    console.log('SelFile swipeLEFT',currentPic, ' arraypic',window.opener.SelectedPics[ps+1]);
+                    nhldpath=nhldpath.replace(window.opener.SelFile, window.opener.SelectedPics[ps+1]);
+                    console.log('nhldpath swipe',nhldpath);
+                    currentPic=window.opener.SelectedPics[ps+1];
+                    $("#MainIMG").attr("src", nhldpath);
+/*
+                    $("#MainIMG").one("load", function () {
+                        $("#lblholding").hide();
+                        $("#MainIMG").show();
+                    }).attr("src", nhldpath);
+*/                    
+                });
+                $("#MainIMG").on("swiperight",function(){
+
+                    for (var ps = 0; ps<window.opener.SelectedPics.length;ps++)
+                    {
+                        if (window.opener.SelectedPics[ps]===currentPic)
+                            break;
+                    }
+
+                    console.log('ps swipeRIGHT',ps);
+                    if (ps<1) ps=window.opener.SelectedPics.length;
+                    console.log('ps swipeRIGHT2',ps);
+                    let nhldpath = window.opener.pth2;
+                    nhldpath = nhldpath.replace("?Height=", "?Height=" + $(window).height());
+                    nhldpath = nhldpath.replace("&Width=", "&Width=" + $(window).width());
+                    console.log('SelFile swipeRIGHT',currentPic, ' arraypic',window.opener.SelectedPics[ps-1]);
+                    nhldpath=nhldpath.replace(window.opener.SelFile, window.opener.SelectedPics[ps-1]);
+                    console.log('nhldpath swipe',nhldpath);
+                    currentPic=window.opener.SelectedPics[ps-1];
+                    $("#MainIMG").attr("src", nhldpath);
+                    /*
+                    $("#MainIMG").one("load", function () {
+                        $("#lblholding").hide();
+                        $("#MainIMG").show();
+                    }).attr("src", nhldpath);
+                    */                    
+                 });
+
                 hldpath = window.opener.pth2;
                 hldpath = hldpath.replace("?Height=", "?Height=" + $(window).height());
                 hldpath = hldpath.replace("&Width=", "&Width=" + $(window).width());

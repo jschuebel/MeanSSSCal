@@ -123,12 +123,14 @@ router.post('/loggeduser', verifyToken, (req, res) => {
     console.log('hit api post loggeduser');
     jwt.verify(req.token, process.env.Audience__Secret, (err, authData) => {
       if(err) {
+        console.log("loggeduser err",err, 'token', req.token);
         res.sendStatus(403);
       } else {
-
+        console.log('loggeduser authData', authData);
         let tst = authData.role;
         res.json({
           message: 'Post created...',
+          username: authData.username,
           aud: authData.aud,
           iss: authData.iss,
           claims:authData.role

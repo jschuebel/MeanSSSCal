@@ -28,6 +28,7 @@ import { TablecolumnfilterComponent } from './tablecolumnfilter/tablecolumnfilte
 import { PictureComponent } from './picture/picture.component';
 import { Windowref } from './windowref.service';
 import { AuthInterceptor } from './auth-interceptor';
+import { SsoComponent } from './sso/sso.component';
 
 const ROUTES : Routes = [
   {
@@ -60,7 +61,15 @@ const ROUTES : Routes = [
   {
     path: 'posts',
     component: PostsComponent
+  },
+  
+  {
+    path: 'sso',
+    component: SsoComponent
   }
+
+  
+
 ];
 
 @NgModule({
@@ -75,7 +84,8 @@ const ROUTES : Routes = [
     EventsearchComponent,
     EmailComponent,
     TablecolumnfilterComponent,
-    PictureComponent
+    PictureComponent,
+    SsoComponent
   ],
   imports: [
     BrowserModule,

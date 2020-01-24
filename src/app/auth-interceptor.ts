@@ -14,6 +14,7 @@ export class AuthInterceptor implements HttpInterceptor {
     // Get the auth token from the service.
     //const authToken = this.auth.getAuthorizationToken();
     let currTokenVal:string = this._authService.getToken();
+    console.log("interceptor _authService.getToken currTokenVal", currTokenVal)
     if (currTokenVal!==null) {
     const  authToken:string = 'Bearer ' + currTokenVal;
 
