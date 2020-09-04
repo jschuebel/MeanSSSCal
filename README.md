@@ -6,9 +6,12 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 - Moved to Angular to 5.2
 - Added Lodash
-- Added Json Web Token security
+- Added Json Web Token security(SSO) (1/2020)
+- Added swipe to popup picture (1/2020)
 - Used FullCanendar control
 - Json parsing of picture data
+- MongoDB
+- NodeJS
 
 ## Developer
 Run `ng serve` for a dev server. Navigate to `http://localhost:3000/`. The app will automatically reload if you change any of the source files.
