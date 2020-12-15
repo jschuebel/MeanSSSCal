@@ -11,11 +11,14 @@
             <th  style="cursor: pointer">
                     <app-tablecolumnfilter [ColumnName]="'Name'" [SelectedColumnName]="sortColumn" (onFilter)="filter($event);" (onSort)="sort($event);">Name</app-tablecolumnfilter>
             </th>
-            <th  style="cursor: pointer">
+            <th  style="cursor: pointer"  class="smallSCR medSCR">
                 <app-tablecolumnfilter [RequiredLength]="8" [ColumnName]="'events[0].Date'" [SelectedColumnName]="sortColumn" (onFilter)="filter($event);" (onSort)="sort($event);">Birth Date</app-tablecolumnfilter>
             </th>
             <th  style="cursor: pointer">
                 <app-tablecolumnfilter [ColumnName]="'Home Phone'" [SelectedColumnName]="sortColumn" (onFilter)="filter($event);" (onSort)="sort($event);">Home Phone</app-tablecolumnfilter>
+            </th>
+            <th  style="cursor: pointer" class="smallSCR">
+                <app-tablecolumnfilter [ColumnName]="'Mobile'" [SelectedColumnName]="sortColumn" (onFilter)="filter($event);" (onSort)="sort($event);">Mobile Phone</app-tablecolumnfilter>
             </th>
             <th></th>
         </tr>
@@ -23,8 +26,9 @@
     
     <tr *ngFor="let aw of pagedItems">
       <td>{{aw.Name}}</td>
-      <td>{{aw.events[0]!=null ? (aw.events[0].Date  | date) : "N/A"}}</td>
+      <td  class="smallSCR medSCR">{{aw.events[0]!=null ? (aw.events[0].Date  | date) : "N/A"}}</td>
       <td>{{aw['Home Phone']!=null? aw['Home Phone'] : "N/A"}}</td>
+      <td  class="smallSCR">{{aw.Mobile!=null? aw.Mobile : "N/A"}}</td>
       <td><button role="button" (click)="openPerson(EditPersonPop, this.aw)" class="btn btn-primary btn-sm">Edit</button></td>
     </tr>
     <tr >

@@ -203,7 +203,8 @@ export class PictureComponent implements OnInit {
 
   ChangeMovie(path){
     console.log("ChangeMovie path", path);
-    let hldpath = path.replace("d:/inetpub/", "http://www.schuebelsoftware.com/"); 
+    const regp = /[cdefg]:\/inetpub\//
+    let hldpath = path.replace(regp, "http://www.schuebelsoftware.com/"); 
     //f:/inetpub/family/jt/jmallwalkwave.mp4
     //let hldpath  ="http://www.schuebelsoftware.com/family/jt/jmallwalkwave.mp4";
     console.log("ChangeMovie updated hldpath", hldpath);

@@ -63,15 +63,15 @@ export class EventsearchComponent implements OnInit {
       console.log("Error from getUsers", err)
     });
 
-    this.getEvents();
-
-    
-
     this._dataService.getCategories()
     .subscribe(res => {
       this.CategoryList = res.data;
-      //console.log("CategoryList=",this.CategoryList);
+      console.log("CategoryList=",this.CategoryList);
     });
+console.log('>>>>>>>>>>>>>>>>>>>>  getting events');
+    this.getEvents();
+ 
+
 
 
   }

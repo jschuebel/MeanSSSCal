@@ -22,7 +22,7 @@
 
                 $("#MainMov").attr("height", $(window).height()-15);
                 $("#MainMov").attr("width", $(window).width()-15);
-                hldpath = window.opener.pth2.replace("d:/inetpub/", "http://www.schuebelsoftware.com/"); //"http://localhost/");
+                hldpath = window.opener.pth2.replace(/.:\/inetpub\//, "http://www.schuebelsoftware.com/"); //"http://localhost/");
                 $("#MainMov").attr("src", hldpath);
                 //alert("MainMov after set src=" + $("#MainMov").attr("src"));
 

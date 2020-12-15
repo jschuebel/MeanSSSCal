@@ -8,10 +8,9 @@ const jwt = require('jsonwebtoken');
 
 // Connect
 const connectionPerson = (closure) => {
-    return MongoClient.connect('mongodb://localhost:27017/SSSPersonDB', (err, db) => {
+    return MongoClient.connect('mongodb://localhost:27017', {useUnifiedTopology: true}, (err, client) => {
         if (err) return console.log(err);
-
-        closure(db);
+        closure(client);
     });
 };
 
@@ -158,7 +157,9 @@ router.post('/user', verifyToken, function(req, res) {
         req.body.event.createdate = new Date(req.body.event.createdate);
     */    
 
-    connectionPerson((db) => {
+    connectionPerson((client) => {
+        var db = client.db('SSSPersonDB');
+ 
 		Promise.all([
            updateUser(db,hldUser),
            updateEvent(db,hldEvent),
@@ -182,8 +183,9 @@ router.post('/user', verifyToken, function(req, res) {
 
 // Get users
 router.get('/users', (req, res) => {
-    connectionPerson((db) => {
-        db.collection('people')
+    connectionPerson((client) => {
+        var db = client.db('SSSPersonDB');
+        var aggCursor =db.collection('people')
             .aggregate([
             //{ $match : { Name: /^James A/  } }, 
             
@@ -234,10 +236,13 @@ router.get('/users', (req, res) => {
 				  } 
 				} 
 			  } 
-			} 
-			], function(err, peopleList) {
-			if (err) throw err;
-			db.close();
+            }]
+            /*, function(err, peopleList) {
+                console.log('>>>>>>>>>>>>>>>>>  USERS return');
+                console.log('>>>>>>>>>>>>>>>>>  USERS err', err);
+                if (err) throw err;
+                
+			client.close();
 			//peopleList.forEach((ritm) => {
 				//console.log("Name", ritm.Name, "      Event", (ritm.events!=null&&ritm.events.length>0?ritm.events:"N/A"));
 				//console.log("Address", ritm.address!=null?ritm.address[0]:"no");
@@ -250,7 +255,18 @@ router.get('/users', (req, res) => {
 			//});
 			//console.log("result", res);
 			res.json(peopleList);
-		  })
+          }*/ );
+
+          var peopleList=Array();
+          aggCursor.each(function(err, docs) {
+            peopleList.push(docs);
+            if(docs == null) {
+              client.close();
+              res.json(peopleList);
+            }
+          });
+
+
 	  });
 });
 
@@ -308,8 +324,10 @@ router.get('/events', (req, res) => {
     //ORIG{ $match : { $or: [ {Date: {"$gte": startDate, "$lt": endDate}}, {$and:[{Date: {$ne:null}} ,{TopicID:1}]}  ]}}, 
     //mtch = { $match : {$and:[  {UserID:1},{Date: {"$gte": new Date("3/1/2013")}}, {Date: {"$lt": new Date("5/1/2013")}}]}  } ;
     console.log("mtch filters=",mtch);
-    connectionPerson((db) => {
-        db.collection('events')
+    connectionPerson((client) => {
+        var db = client.db('SSSPersonDB');
+ 
+        var eventCusor = db.collection('events')
             .aggregate([
                 mtch,
 				{ $lookup:
@@ -321,34 +339,42 @@ router.get('/events', (req, res) => {
                     }
                 },
                 {$sort: {Date: 1}}
-			], function(err, eventList) {
-			if (err) throw err;
-			db.close();
+            ]); 
+            var eventList=Array();
+            eventCusor.each(function(err, docs) {
+                eventList.push(docs);
+              if(docs == null) {
+                client.close();
+                //console.log('before cursor eventList', eventList);
+                lodash.remove(eventList, function (selVal) {
+                    //console.log('selVal', selVal);
+                    return (selVal===null || (selVal!=null && selVal.Date===null));
+                  });
+                res.json(eventList);
+            }
             //console.log("eventList count", eventList.length);
-            lodash.remove(eventList, function (selVal) {
-                return (selVal.Date===null);
-              });
-        
-            res.json(eventList);
-		  })
+            });
+    
+  
 	  });
 });
 
 
 router.get('/addresses', (req, res) => {
-    connectionPerson((db) => {
+    connectionPerson((client) => {
+        var db = client.db('SSSPersonDB');
         db.collection('addresses')
         .find()
         .toArray()
         .then((addresses) => {
-            db.close();
+            client.close();
              //   console.log("addresses",addresses);
                 response.data = addresses;
                 res.json(response);
-            })
-            .catch((err) => {
+         })
+        .catch((err) => {
                 sendError(err, res);
-            });
+        });
     });
 });
 
@@ -400,17 +426,18 @@ router.post('/eventemail', verifyToken, function(req, res) {
 
 
 router.get('/categories', (req, res) => {
-    connectionPerson((db) => {
+    connectionPerson((client) => {
+        var db = client.db('SSSPersonDB');
         db.collection('events')
             .distinct("Category")
             .then((Categories) => {
-                db.close();
+                client.close();
              //   console.log("Categories",Categories);
                 response.data = Categories;
                 res.json(response);
             })
             .catch((err) => {
-                db.close();
+                client.close();
                 sendError(err, res);
             });
     });

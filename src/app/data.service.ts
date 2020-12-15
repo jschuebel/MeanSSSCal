@@ -119,7 +119,7 @@ export class DataService {
   
   getPictures()  {
     //force result to string
-      return this._http.get("./Inetpub.json", {responseType: 'text'});
+      return this._http.get("./inetpub.json", {responseType: 'text'});
   }
   
   getAddresses() {

@@ -8,7 +8,7 @@ import { NgClass } from '@angular/common';
 })
 export class AppComponent {
   title = 'app';
-  showSideBar = false;
+  showSideBar = true;
   
   constructor() {
   }

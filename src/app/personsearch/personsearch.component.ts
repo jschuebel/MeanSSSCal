@@ -110,7 +110,10 @@ filter(data){
   this.PeopleDataList=this.MasterPeopleDataList;
   this.PeopleDataList = <Person[]> _.reduce(this.PeopleDataList, function(memo, val, idx) {
     let bracketPos=data.col.indexOf("[");
-    /*
+
+    if (val!=null && val[data.col]!=null) {
+    
+      /*
     console.log("filter bracketPos", bracketPos);
     var newval="";
     var nbrk = "";
@@ -138,19 +141,28 @@ filter(data){
       let nDate = new Date(data.val);
       let newval=data.col.substr(0,bracketPos);
       if (val[newval].length>0) {
-        console.log("SEL1 val[newval][0].Date", typeof(val[newval][0].Date));
-        console.log("SEL1 Date", typeof(nDate));
+        //console.log("SEL1 val[newval][0].Date", typeof(val[newval][0].Date));
+        //console.log("SEL1 Date", typeof(nDate));
         if (new Date(val[newval][0].Date) > nDate) {
-          console.log("SEL1 FOUND val", val);
+          //console.log("SEL1 FOUND val", val);
           memo.push(val);
         }
       }
     } else {
-      if (val[data.col].toLowerCase().includes(data.val)) {
-        console.log("SEL2 FOUND val", val);
-        memo.push(val);
+      if (isNaN(val[data.col])) {
+        if (val[data.col].toLowerCase().includes(data.val)) {
+          //console.log("SEL2 FOUND val", val);
+          memo.push(val);
+        }
+      }
+      else {
+        if (val[data.col].includes(data.val)) {
+          //console.log("SEL2B FOUND val", val);
+          memo.push(val);
+        }
       }
     }
+  }
     return memo;
   }, []);
   this.setPage();

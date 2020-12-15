@@ -10,15 +10,15 @@ var Promise = require('rsvp').Promise;
 module.exports = {
   FindinCol1: function(mnths, startDate, endDate) {
     return new Promise(function(resolve, reject) {
-      MongoClient.connect('mongodb://localhost:27017/SSSPersonDB', function(err, db) {
+      MongoClient.connect('mongodb://localhost:27017/SSSPersonDB', {useUnifiedTopology: true}, function(err, client) {
         if (err) {
           reject(err);  
         } else {
-          resolve(db);
+          resolve(client);
         }        
       })
-    }).then(function(db) {
-		
+    }).then(function(client) {
+      var db = client.db('SSSPersonDB');
       var collection = db.collection('events');
       //var myresults=[];
       let promises = [];
