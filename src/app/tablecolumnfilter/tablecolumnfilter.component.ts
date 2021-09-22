@@ -24,7 +24,7 @@ export class TablecolumnfilterComponent implements OnInit {
     if (this.ColumnName===this.SelectedColumnName) this.isFirst=false;
   }
 
-  Filter(property){
+  Filter(property:any){
     console.log("filter val=",property, "col=", this.ColumnName);
     //console.log("filter property.length=",property.length);
     //console.log("filter RequiredLength=",this.RequiredLength);
@@ -35,7 +35,7 @@ export class TablecolumnfilterComponent implements OnInit {
   };
 
 
-  Sort(property){
+  Sort(property:any){
     this.ColumnName = property;
     if (!this.isFirst)
       this.isDesc = !this.isDesc; //change the direction    

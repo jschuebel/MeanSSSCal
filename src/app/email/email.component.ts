@@ -1,8 +1,8 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { DataService } from '../data.service';
 import { AuthService } from '../auth.service'
 import { Person } from '../Model/Person';
-import { Event } from '../Model/Event';
+import { SSSEvent } from '../Model/SSSEvent';
 import  * as _ from 'lodash';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -14,15 +14,15 @@ import { Subscription } from 'rxjs/Subscription';
   styleUrls: ['./email.component.css']
 })
 export class EmailComponent implements OnInit {
-  @ViewChild('cboPeople') selectElRef;
-  @ViewChild('cboSELPeople') selectSELElRef;
+  @ViewChild('cboPeople') selectElRef: ElementRef;
+  @ViewChild('cboSELPeople') selectSELElRef: ElementRef;
   private subscription: Subscription;
   PeopleList : Person[] = [];
   UnSelectedEmailList : Person[] = [];
   SelectedEmailList : Person[] = [];
   SelectedEmailIDList : number[] = [];
-  SelectedEvent : Event;
-  EventDataList : Event[] = [];
+  SelectedEvent : SSSEvent;
+  EventDataList : SSSEvent[] = [];
   message = "";
   isLoggedIn = false;
  
@@ -53,7 +53,7 @@ export class EmailComponent implements OnInit {
 	
     this._dataService.getEvents(null,null,null,null,null)
     .subscribe(res => {
-      var evt = new Event();
+      var evt = new SSSEvent();
       evt._id=-1;
       evt.DisplayOnly="** Choose Event **";
       evt.Date = new Date();
@@ -90,10 +90,11 @@ export class EmailComponent implements OnInit {
 	
 }
 
-toJSONLocal (date) {
-  var local = new Date(date);
+toJSONLocal (date:Date) {
+  var locl = new Date(date);
   //local.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-  return local.toJSON().slice(0, 10);
+  console.log("toJSONLocal local.toUTCString()=",locl.toJSON());
+  return locl.toJSON().slice(0, 10);
 }
 
 UpdateLists() {
@@ -107,7 +108,7 @@ UpdateLists() {
   }
   else {
      let currList = this.SelectedEmailIDList;
-      this.SelectedEmailList = <Person[]> _.reduce(this.PeopleList, function(memo, val, idx) {
+      this.SelectedEmailList = <Person[]> _.reduce(this.PeopleList, function(memo:any, val:any, idx:any) {
         //console.log("SEL val.id", val._id);
         //console.log("SEL  this.SelectedEmailIDList=", currList);
         if (_.includes(currList, val._id)) {
@@ -116,7 +117,7 @@ UpdateLists() {
         }
         return memo;
       }, []);
-      this.UnSelectedEmailList = <Person[]> _.reduce(this.PeopleList, function(memo, val, idx) {
+      this.UnSelectedEmailList = <Person[]> _.reduce(this.PeopleList, function(memo:any, val:any, idx:any) {
         //console.log("UNSEL val.id", val._id);
         if (!_.includes(currList, val._id)) {
           //console.log("UNSEL FOUND val.id", val._id);
@@ -127,7 +128,7 @@ UpdateLists() {
   }
 } 
 
-onChange(evnt) {
+onChange(evnt:SSSEvent) {
   //  console.log("onchange evnt=",this.SelectedEvent.Emails);
 	this.SelectedEmailIDList = this.SelectedEvent.Emails;
   //  console.log("onchange SelectedEmailIDList=",this.SelectedEmailIDList);

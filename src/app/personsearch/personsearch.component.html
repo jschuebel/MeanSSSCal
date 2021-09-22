@@ -26,8 +26,8 @@
     
     <tr *ngFor="let aw of pagedItems">
       <td>{{aw.Name}}</td>
-      <td  class="smallSCR medSCR">{{aw.events[0]!=null ? (aw.events[0].Date  | date) : "N/A"}}</td>
-      <td>{{aw['Home Phone']!=null? aw['Home Phone'] : "N/A"}}</td>
+      <td  class="smallSCR medSCR">{{aw.events[0]!=null ? (aw.events[0].Date | date) : "N/A"}}</td>
+      <td>{{aw['Home_Phone']!=null? aw['Home_Phone'] : "N/A"}}</td>
       <td  class="smallSCR">{{aw.Mobile!=null? aw.Mobile : "N/A"}}</td>
       <td><button role="button" (click)="openPerson(EditPersonPop, this.aw)" class="btn btn-primary btn-sm">Edit</button></td>
     </tr>
@@ -71,7 +71,7 @@
                             <label  class="label2" for="Home_Phone">Home_Phone</label>
                     </div>
                     <div class="col-xs-6 col-lg-8" >
-                            <input class="form-control" type="text" name="Home_Phone" id="Home_Phone"  [(ngModel)]="selectedPerson['Home Phone']" /> 
+                            <input class="form-control" type="text" name="Home_Phone" id="Home_Phone"  [(ngModel)]="selectedPerson.Home_Phone" /> 
                     </div>
             </div>  
             <div class="row" > 
@@ -79,7 +79,7 @@
                     <label  class="label2" for="E_Mail">Email Adress</label>
                 </div>
                 <div class="col-xs-6 col-lg-8" >
-                    <input class="form-control" type="text" name="E_Mail" id="E_Mail"  [(ngModel)]="selectedPerson['E-Mail']" /> 
+                    <input class="form-control" type="text" name="E_Mail" id="E_Mail"  [(ngModel)]="selectedPerson.E_Mail" /> 
                 </div>
             </div>  
              <div class="row"> 
@@ -87,7 +87,7 @@
                         <label class="label2" for="type">Date of Birth</label>
                 </div>
                 <div class="col-xs-6 col-lg-8" >
-                    <input class="form-control" type="date" name="DOB" id="DOB" [(ngModel)]="selectedPerson.events[0].Date" /> 
+                    <input class="form-control" type="date" name="DOB" id="DOB" [(ngModel)]="selectedPerson.events[0].displayDate" /> 
                 </div>
             </div>  
             <div class="row"> 

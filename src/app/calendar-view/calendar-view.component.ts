@@ -3,9 +3,9 @@ import { NgSwitchCase } from '@angular/common';
 //import {CalendarComponent} from "ap-angular2-fullcalendar/src/calendar/calendar";
 import { DataService } from '../data.service';
 import { MyEvent, colors } from '../Model/MyEvent';
-import { CalendarEvent } from 'angular-calendar';
-import { Subject } from 'rxjs/Subject';
-import { Observable } from 'rxjs/Observable';
+import { CalendarView, CalendarEvent } from 'angular-calendar';
+import { Observable, Subject } from 'rxjs';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 //https://www.npmjs.com/package/angular-calendar
 //https://mattlewis92.github.io/angular-calendar/#/kitchen-sink
@@ -18,12 +18,13 @@ import { Observable } from 'rxjs/Observable';
   styleUrls: ['./calendar-view.component.css']
 })
 export class CalendarViewComponent implements OnInit {
-  view: string = 'month';
-  viewDate: Date;
+  view: CalendarView = CalendarView.Month;
+  CalendarView = CalendarView;
+  viewDate: Date = new Date() ;
   refresh: Subject<any> = new Subject();
   
     //events: Array<CalendarEvent<{ incrementsBadgeTotal: boolean }>> = 
-  events: any[];
+  events: CalendarEvent[];
   activeDayIsOpen: boolean = false;
   
 
@@ -45,11 +46,11 @@ export class CalendarViewComponent implements OnInit {
     console.log("lastDay=", lastDay);
    
         this._dataService.getCalendarEvents(firstDay, lastDay)
-          .then(res => { 
+          .subscribe(res => { 
             console.log("returned from getCalendarEvents");
             //console.log("result getCalendarEvents res",res);
             //console.log("result getCalendarEvents resType",typeof(res));
-            res.forEach((ritm) => {
+            res.forEach((ritm : any) => {
               ritm.start=ritm.start.replace("T00","T06");
               ritm.start = new Date(ritm.start);
               ritm.color= colors.blue;
@@ -88,7 +89,7 @@ export class CalendarViewComponent implements OnInit {
   }
 
 
-  dayClicked({ date, events}: { date: Date; events: MyEvent[]}): void {
+  dayClicked({ date, events}: { date: Date; events: CalendarEvent[]}): void {
       //if (isSameMonth(date, this.viewDate)) {
         //if (
           //(isSameDay(this.viewDate, date) && this.activeDayIsOpen === true) ||
@@ -106,13 +107,22 @@ export class CalendarViewComponent implements OnInit {
     //  }
     }
 
-
-    handleEvent(action: string, event: Date): void {
-//      console.log(action);
-      console.log("event=" + event);
+    closeOpenMonthViewDay(dir:any) {
+      this.activeDayIsOpen = false;
+      console.log("closeOpenMonthViewDay dir=" + dir);
+      if (dir==2)
+        this.viewDate = new Date(this.viewDate.setMonth(this.viewDate.getMonth()+1));
+      else
+        this.viewDate = new Date(this.viewDate.setMonth(this.viewDate.getMonth()-1));
       console.log("viewDate=" + this.viewDate);
 
-      this.viewDate=event;      
+      this.getEvents();
+    }
+
+    handleEvent(action: string, event: CalendarEvent): void {
+     console.log("closeOpenMonthViewDay viewDate=" + this.viewDate);
+
+///TODO      this.viewDate=event;      
 //      var firstDay = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth(), 1);
 //      var lastDay = new Date(this.viewDate.getFullYear(), this.viewDate.getMonth() + 1, 0);
 //      console.log("firstDay=" + firstDay);

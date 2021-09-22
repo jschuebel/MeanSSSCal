@@ -1,9 +1,9 @@
-import { Event } from '../Model/Event';
+import { SSSEvent } from './SSSEvent';
 import { Address } from '../Model/Address';
 
 export class Person {
     _id:number;
-    AddressID:number;
+    AddressID?:number;
     Name: string;
     Home_Phone: string;
     E_Mail: string;
@@ -12,12 +12,11 @@ export class Person {
     Pager: string;
     Fax: string;
     BirthdayAlert:boolean;
-    events: Event[] = [];
+    events: SSSEvent[] = [];
     constructor() {
 		this.Name = "";
-      this.events.push(new Event());
+      this.events.push(new SSSEvent());
     }
-    
   };
 
  

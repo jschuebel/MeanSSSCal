@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { DataService } from '../data.service';
+import { DataService, Nullable} from '../data.service';
 import { AuthService } from '../auth.service'
 import {  NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs/Subscription';
 import { Person } from '../Model/Person';
+import { SSSEvent } from '../Model/SSSEvent';
 
 @Component({
   selector: 'app-eventsearch',
@@ -14,12 +15,12 @@ export class EventsearchComponent implements OnInit {
   private subscription: Subscription;
   isLoggedIn = false;
   message: string;
-  Descrip: string;
+  Descrip: Nullable<string>;
   PeopleList : Person[] = [];
   SelectedPerson : Person;
   
   CategoryList = [];
-  EventDataList = [];
+  EventDataList : SSSEvent[] = [];
   pagedItems: any[];
 
   currentPage = 0;
@@ -30,8 +31,8 @@ export class EventsearchComponent implements OnInit {
   selectedCategory: string;
   closeResult: string;
   
-  fromDate: string;
-  toDate: string;
+  fromDate: Nullable<string>;
+  toDate: Nullable<string>;
 
   constructor(private _dataService:DataService,
             private _authService:AuthService,
@@ -114,7 +115,7 @@ console.log('>>>>>>>>>>>>>>>>>>>>  getting events');
     this.getEvents();
   }
 
-  onChange(Category) {
+  onChange(Category:string) {
     console.log("Category=",Category);
     this.selectedCategory=Category;
     this.getEvents();
@@ -135,20 +136,21 @@ console.log('>>>>>>>>>>>>>>>>>>>>  getting events');
     console.log("this.pagedItems=",this.pagedItems);
   }
 
-  toJSONLocal (date) {
-	  var local = new Date(date);
+  toJSONLocal (date:Date) {
+    var locl = new Date(date);
     //local.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-    return local.toJSON().slice(0, 10);
+    console.log("toJSONLocal local.toUTCString()=",locl.toJSON());
+    return locl.toJSON().slice(0, 10);
   }
   
 
 
   //https://ng-bootstrap.github.io/#/components/modal/examples
-  open(content, event) {
+  open(content:any, event:SSSEvent) {
     console.log("open(event)=",event);
     console.log("open(content)=",content);
-  if (event.Date!=null)
-  event.Date = this.toJSONLocal(event.Date);
+    if (event.Date!=null)
+      event.Date = new Date(this.toJSONLocal(event.Date));
 
     this.message = "here is the select id = " + event._id;
     this.selectedEvent=event;

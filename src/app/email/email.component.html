@@ -1,6 +1,6 @@
 <div class="text-danger" *ngIf="message">{{message}}</div>
 
-<div class="container" style="border: 3px solid blue;">
+<div class="container">
 <div class="row justify-content-md-center">
         <select id="cboEvent" name="cboEvent"   [(ngModel)]="SelectedEvent" (ngModelChange)="onChange($event)">
               <option *ngFor="let e of EventDataList"   [ngValue]="e" [innerHTML]="e.DisplayOnly"></option>

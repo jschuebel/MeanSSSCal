@@ -7,7 +7,7 @@ const lodash = require('lodash');
 const jwt = require('jsonwebtoken');
 
 // Connect
-const connectionPerson = (closure) => {
+const CreateConnection = (closure) => {
     return MongoClient.connect('mongodb://localhost:27017', {useUnifiedTopology: true}, (err, client) => {
         if (err) return console.log(err);
         closure(client);
@@ -69,32 +69,338 @@ function updateUser(db, user) {
         })
     });
   }
-  
-router.post('/login', function(req, res) {
-    console.log("login hit");
+
+  router.get('/login', (req, res) => {
+
     console.log("req.body",req.body);    //body to json from a post
     console.log("req.query", req.query);
+    console.log("req.query ssoReturn", req.query.ssoReturn);
+    let sess=req.session;
+    sess.ssoReturnUrl = req.query.ssoReturn;
+   
+    console.log("req.user", req.user);
+    console.log("req.sessionID", req.sessionID);
+    console.log("req.headers.referer", req.headers.referer);
 
-    var hldUser = JSON.parse(JSON.stringify(req.body.person));
-    console.log("hldUser",hldUser);
-    if (hldUser.Name!=="jim" || hldUser.Pager!=="pass")
-        res.sendStatus(403);
-    else {
-            const user = {
-                scope:'System',
-                iss: "http://www.schuebelsoftware.com",
-                aud: "Family",
-                username: hldUser.Name,
-                role:['admin', 'user']
-            }
+  res.sendFile(path.join(__dirname, '../../dist/login.html'));
 
-            jwt.sign(user, process.env.Audience__Secret, (err,token) => {
-                res.json({
-                    token:token
-                });
-            });
-        }
 });
+  
+  
+router.post('/login', function(req, res) {
+    //console.log("login hit");
+    //console.log("req.body",req.body);    //body to json from a post
+    //console.log("req.query", req.query);
+    //console.log("req.session", req.session);
+
+    let sess=req.session;
+    //console.log("req.session", sess);
+    console.log("req.session ssoReturn", sess.ssoReturnUrl);
+
+    var hldUser = JSON.parse(JSON.stringify(req.body));
+    //console.log("hldUser",hldUser);
+
+//http://sss2:3000/sso/
+//http://a50.schuebelsoftware.com/person
+//sess.ssoReturnUrl=sess.ssoReturnUrl.replace("sss2:3000","a50.schuebelsoftware.com");
+  console.log("req.session *updated* ssoReturn", sess.ssoReturnUrl);
+
+    CreateConnection((client) => {
+		var db = client.db('userAuthDB');
+        db.collection('user')
+        .find({username:hldUser.UName.toLowerCase(), password:hldUser.password})
+        .toArray()
+        .then((userrec) => {
+            client.close();
+            if (userrec!=null && userrec.length>0) {
+                console.log("user found return role count",userrec[0]);
+
+                const user = {
+                    scope:'System',
+                    iss: "http://www.schuebelsoftware.com",
+                    aud: "Family",
+                    username: hldUser.UName,
+					ses:userrec[0]._id.toString(),
+					createdOn: new Date()
+                    //role:[] used for ID_TOKEN
+                }
+                //console.log("jwt user ",user);
+
+                const refreshToken = jwt.sign(user, process.env.Audience__Secret,{expiresIn:'1y'});
+        
+                //for(var i=0;i<userrec[0].roles.length;i++)
+                //  user.role.push(userrec[0].roles[i]);
+                jwt.sign(user, process.env.Audience__Secret,{expiresIn:'30s'},  (err,token) => {
+        
+        
+					CreateConnection((client) => {
+						var db = client.db('userAuthDB');
+                        db.collection('token')
+                            .insertOne({refreshtoken:refreshToken, token : token})
+                            .then(() => {
+                                client.close();
+        
+                                //res.set("Authorization", "Bearer " + token);
+/**********************  Cookies will not work on external SSO
+
+                               //var expiryDate = new Date(Number(new Date()) + (600 * 1000)); 
+                               // res.cookie('id_token' ,token, {expires: expiryDate});
+							   
+							   res.cookie('accesstoken', token, {
+									maxage: 300000,   //5 mins
+									httpOnly:true
+								   });
+							   res.cookie('refresh', refreshToken, {
+									maxage: 3.154e10,   //1 year
+									httpOnly:true
+								   });
+******************************/								   
+                                res.redirect(sess.ssoReturnUrl + "?token=" + token + "&reftoken=" + refreshToken)
+/*                                res.json({
+                                    token:token
+                                });
+*/								
+
+                            })
+                            .catch((err) => {
+                                client.close();
+                                console.log("saving token failed",err);
+                                sendError(err, res);
+                            });
+                    });
+                });
+            }
+            else {
+                console.log("user NOT found");
+                res.sendFile(path.join(__dirname, '../../dist/index.html'));
+
+            }
+            })
+            .catch((err) => {
+                console.log("origin NOT found",err);
+                res.sendFile(path.join(__dirname, '../../dist/index.html'));
+    //            sendError(err, res);
+            });
+    });
+
+
+});
+
+  
+router.post('/logout', (req, res) => {  
+    console.log('hit api post logout');
+
+	const bearerHeader = req.headers['authorization'];
+    // Check if bearer is undefined
+    if(typeof bearerHeader !== 'undefined') {
+		  // Split at the space
+		  const bearer = bearerHeader.split(' ');
+		  // Get token from array
+		  const bearerToken = bearer[1];
+
+		//console.log('api post logout req.token', req.token);
+		console.log('api post logout bearerToken', bearerToken);
+
+
+		jwt.verify(bearerToken, process.env.Audience__Secret, (err, authData) => {
+		console.log('api post logout back from jwt.verify');
+		  if(err) {
+			if (err.name==="TokenExpiredError") {
+				console.log('api post logout  **========> TokenExpiredError');
+			}
+			else {
+				console.log('api post logout  ** failed', err);
+			}
+		  }
+
+		//find the current token and remove
+		CreateConnection((client) => {
+			var db = client.db('userAuthDB');
+			db.collection('token')
+			.find({token:bearerToken})
+			.toArray()
+			.then((tokenrec) => {
+				console.log("api post logout Removing token",tokenrec[0].token);
+				db.collection('token').remove(tokenrec[0]);
+				client.close();
+				console.log("api post logout Removed token");
+/***** could not pass cookies across domains				
+			   res.cookie('accesstoken', token, {
+				   expiresIn:'',
+					maxage: 0,
+					httpOnly:true
+				   });
+			   res.cookie('refresh', refreshToken, {
+					maxage: 0,
+					httpOnly:true
+				   });
+***/				   
+				
+			})
+			.catch((err) => {
+				console.log("api post logout token NOT found err=",err);
+			});
+		});
+		});
+	}
+	else {
+				console.log("api post logout *** no token");
+	}
+  });
+  
+router.post('/loggeduser', verifyToken, (req, res) => {  
+    console.log('hit api post loggeduser');
+
+//************** cookies are not sent acrosss countext
+    //console.log('Cookies: ', req.cookies)
+	//console.log('Signed Cookies: ', req.signedCookies)
+	//var rc = req.headers.cookie;
+	//console.log('rc: ', rc)
+//	console.log('response.headers.cookie: ', req.headers.cookie)
+//************** cookies are not sent acrosss countext
+
+	//console.log('response.headers: ', req.headers)
+	console.log('response.headers[authorization]: ', req.headers.authorization)
+	
+	 
+
+
+
+    jwt.verify(req.token, process.env.Audience__Secret, (err, authData) => {
+    console.log('hit api post loggeduser back from jwt.verify');
+      if(err) {
+			if (err.name==="TokenExpiredError") {
+				console.log('hit api post loggeduser **========> TokenExpiredError');
+				res.sendStatus(401);
+			}
+			else {
+				console.log('hit api post loggeduser ** failed', err);
+			}
+      } else {
+
+
+        let tst = authData.role;
+        res.json({
+          message: 'Post created...',
+          aud: authData.aud,
+          iss: authData.iss,
+          claims:authData.role
+        });
+      }
+    });
+  });
+
+
+function getHeaderFromToken(token) {
+ const decodedToken = jwt.decode(token, {
+  complete: true
+ });
+
+ if (!decodedToken) {
+  throw new Parse.Error(Parse.Error.OBJECT_NOT_FOUND, `provided token does not decode as JWT`);
+ }
+
+ return decodedToken.header;
+}
+
+//authorization header now has refresh token
+router.post('/refreshtoken', verifyToken, (req, res) => {  
+    console.log('hit api post refreshtoken');
+    console.log('hit api post refreshtoken req.token=',req.token);
+	
+//console.log("api post refreshtoken req.body",req.body.tok);
+
+	//console.log('response.headers: ', req.headers)
+	//console.log('response.headers[authorization]: ', req.headers.authorization)
+	
+	
+    jwt.verify(req.token, process.env.Audience__Secret, (err, authData) => {
+    console.log('api post refreshtoken back from jwt.verify');
+      if(err) {
+			if (err.name==="TokenExpiredError") {
+				console.log('hit api post refreshtoken **========> TokenExpiredError');
+			}
+			else {
+				if (err.name==="JsonWebTokenError") {
+					console.log('hit api post refreshtoken **========> JsonWebTokenError');
+					res.sendStatus(401);
+					return;
+				}
+				else {		 
+					console.log('hit api post refreshtoken **========> ', err);
+				}
+			}
+      } 
+	  
+    //console.log('api post refreshtoken authData=', authData);
+	  
+		CreateConnection((client) => {
+			var db = client.db('userAuthDB');
+			db.collection('token')
+			.find({refreshtoken:req.token})
+			.toArray()
+			.then((tokenrec) => {
+				//AuthData == the data from the refresh token in header 
+
+				const decodedToken = jwt.decode(tokenrec[0].token);
+
+				 if (!decodedToken) {
+					console.log('Parse.Error.OBJECT_NOT_FOUND, provided token does not decode as JWT');
+				 }
+				 delete decodedToken.exp;
+				 delete decodedToken.iat;
+				 decodedToken.createdOn=new Date();
+				 
+/*
+                const user = {
+                    scope:'System',
+                    iss: "http://www.schuebelsoftware.com",
+                    aud: "Family",
+                    username: authData.username,
+					ses:authData.ses,
+					createdOn: new Date()
+                    //role:[] used for ID_TOKEN
+                }
+*/				
+                console.log("jwt user decodedToken",decodedToken);
+
+//                const refreshToken = jwt.sign({ses:userrec[0]._id.toString()}, process.env.Audience__Secret,{expiresIn:'1y'});
+        
+                //for(var i=0;i<userrec[0].roles.length;i++)
+                //  user.role.push(userrec[0].roles[i]);
+                const accessToken = jwt.sign(decodedToken, process.env.Audience__Secret,{expiresIn:'30s'});
+
+
+				tokenrec[0].token=accessToken;
+
+				db.collection('token')
+					.save(tokenrec[0])
+					.then(() => {
+						client.close();
+						console.log("token updated");
+						
+						res.json({
+						  message: 'Post created...',
+						  tok: accessToken,
+						});
+
+					})
+					.catch((err) => {
+						client.close();
+						console.log("saving token failed",err);
+						sendError(err, res);
+					});
+			})
+			.catch((err) => {
+				console.log("token NOT found",err);
+			});
+		});
+ 
+	  
+	  
+	  
+    });
+  });
 
 //http://www.advancesharp.com/blog/1237/angular-6-web-api-2-bearer-token-authentication-add-to-header-with-httpinterceptor
 //https://www.youtube.com/watch?v=7nafaH9SddU&t=674s
@@ -118,25 +424,6 @@ function verifyToken(req, res, next) {
     }
   
   }
-router.post('/loggeduser', verifyToken, (req, res) => {  
-    console.log('hit api post loggeduser');
-    jwt.verify(req.token, process.env.Audience__Secret, (err, authData) => {
-      if(err) {
-        console.log("loggeduser err",err, 'token', req.token);
-        res.sendStatus(403);
-      } else {
-        console.log('loggeduser authData', authData);
-        let tst = authData.role;
-        res.json({
-          message: 'Post created...',
-          username: authData.username,
-          aud: authData.aud,
-          iss: authData.iss,
-          claims:authData.role
-        });
-      }
-    });
-  });
 
 router.post('/user', verifyToken, function(req, res) {
     //console.log("req.body",req.body);    //body to json from a post
@@ -157,7 +444,7 @@ router.post('/user', verifyToken, function(req, res) {
         req.body.event.createdate = new Date(req.body.event.createdate);
     */    
 
-    connectionPerson((client) => {
+        CreateConnection((client) => {
         var db = client.db('SSSPersonDB');
  
 		Promise.all([
@@ -182,8 +469,9 @@ router.post('/user', verifyToken, function(req, res) {
 
 
 // Get users
-router.get('/users', (req, res) => {
-    connectionPerson((client) => {
+router.get('/users', (req, resp) => {
+    console.log('entered GET /users');
+    CreateConnection((client) => {
         var db = client.db('SSSPersonDB');
         var aggCursor =db.collection('people')
             .aggregate([
@@ -257,13 +545,27 @@ router.get('/users', (req, res) => {
 			res.json(peopleList);
           }*/ );
 
-          var peopleList=Array();
-          aggCursor.each(function(err, docs) {
-            peopleList.push(docs);
-            if(docs == null) {
-              client.close();
-              res.json(peopleList);
+		  aggCursor.toArray(function(err, res) {
+            if (err) {
+                console.log('toArray throwing error', err);
+                client.close();
+                throw err;
             }
+            client.close();
+            
+            for(i=0;i<res.length;i++){
+                res[i].AddressID=res[i]["Address ID"];
+                res[i].E_Mail=res[i]["E-Mail"];
+                res[i].Home_Phone=res[i]["Home Phone"];
+
+                delete res[i]["Address ID"];
+                delete res[i]["E-Mail"];
+                delete res[i]["Home Phone"];
+            }
+            //PeopleList.forEach((docs) => {
+            //        console.log("docs", docs);
+            //    });
+            resp.json(res);
           });
 
 
@@ -272,7 +574,7 @@ router.get('/users', (req, res) => {
 
 /* Get users
 router.get('/users2', (req, res) => {
-    connectionPerson((db) => {
+    CreateConnection((db) => {
         db.collection('people')
             .find()
             .toArray()
@@ -293,7 +595,7 @@ router.get('/users2', (req, res) => {
 //Rest passing '/events/:UserID'
 //      req.params.UserID==null
 
-router.get('/events', (req, res) => {
+router.get('/events', (req, resp) => {
     var mtch = { $match : {$and:[]}  } ;
     var dtchk = {Date: {"$gte": new Date("1/1/0001"), "$lt": new Date()}};
     console.log("req.query", req.query);
@@ -324,7 +626,7 @@ router.get('/events', (req, res) => {
     //ORIG{ $match : { $or: [ {Date: {"$gte": startDate, "$lt": endDate}}, {$and:[{Date: {$ne:null}} ,{TopicID:1}]}  ]}}, 
     //mtch = { $match : {$and:[  {UserID:1},{Date: {"$gte": new Date("3/1/2013")}}, {Date: {"$lt": new Date("5/1/2013")}}]}  } ;
     console.log("mtch filters=",mtch);
-    connectionPerson((client) => {
+    CreateConnection((client) => {
         var db = client.db('SSSPersonDB');
  
         var eventCusor = db.collection('events')
@@ -340,28 +642,27 @@ router.get('/events', (req, res) => {
                 },
                 {$sort: {Date: 1}}
             ]); 
-            var eventList=Array();
-            eventCusor.each(function(err, docs) {
-                eventList.push(docs);
-              if(docs == null) {
+            eventCusor.toArray(function(err, res) {
+                if (err) {
+                    console.log('toArray throwing error', err);
+                    client.close();
+                    throw err;
+                }
                 client.close();
                 //console.log('before cursor eventList', eventList);
-                lodash.remove(eventList, function (selVal) {
+                lodash.remove(res, function (selVal) {
                     //console.log('selVal', selVal);
                     return (selVal===null || (selVal!=null && selVal.Date===null));
                   });
-                res.json(eventList);
-            }
-            //console.log("eventList count", eventList.length);
+                resp.json(res);
+            //console.log("eventList count", res.length);
             });
-    
-  
 	  });
 });
 
 
 router.get('/addresses', (req, res) => {
-    connectionPerson((client) => {
+    CreateConnection((client) => {
         var db = client.db('SSSPersonDB');
         db.collection('addresses')
         .find()
@@ -388,7 +689,7 @@ router.post('/event', verifyToken, function(req, res) {
     req.body.event.Date = new Date(req.body.event.Date);
     req.body.event.createdate = new Date(req.body.event.createdate);
     console.log("req.body.event",req.body.event);
-    connectionPerson((db) => {
+    CreateConnection((db) => {
         db.collection('events')
         updateEvent(db, req.body.event).then(() => { 
             db.close();
@@ -407,7 +708,7 @@ router.post('/event', verifyToken, function(req, res) {
 router.post('/eventemail', verifyToken, function(req, res) {
     console.log("req.body",req.body);    //body to json from a post
 //    console.log("req.query", req.query);
-    connectionPerson((db) => {
+CreateConnection((db) => {
         db.collection('events')
             .update({_id:req.body.id}, { $set : {'Emails': req.body.Emails}})
             .then(() => {
@@ -426,7 +727,7 @@ router.post('/eventemail', verifyToken, function(req, res) {
 
 
 router.get('/categories', (req, res) => {
-    connectionPerson((client) => {
+    CreateConnection((client) => {
         var db = client.db('SSSPersonDB');
         db.collection('events')
             .distinct("Category")
@@ -452,7 +753,7 @@ router.get('/events2', (req, res) => {
    
     console.log("startDate",startDate + "  endDate=", endDate);
     
-    connectionPerson((db) => {
+    CreateConnection((db) => {
         db.collection('events')
             .find({"Date" : {"$gte": startDate, "$lt": endDate}},{Description:1, Category:1, Date:1, _id:0})
             .toArray()
@@ -741,7 +1042,7 @@ router.get('/GetCalendarEvents', function(req, res) {
 
     //Get Events == birthday and with 
 /*    
-    connectionPerson((db) => {
+    CreateConnection((db) => {
         db.collection('events')
             .find({Date:{"$ne":null}, $where : mnths, Category:'Birthday'})  //{"Date" : {"$gte": startDate, "$lt": endDate}}
             .toArray()

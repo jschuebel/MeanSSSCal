@@ -1,8 +1,5 @@
 import { Component, OnInit, Renderer2 } from '@angular/core';
-import { Person } from '../Model/Person';
 import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
-import { DataService } from '../data.service';
-import { AuthService } from '../auth.service'
 
 @Component({
   selector: 'app-header',
@@ -11,22 +8,13 @@ import { AuthService } from '../auth.service'
 })
 export class HeaderComponent implements OnInit {
   currentChoice: string = "home";
-  loginPerson: Person;
   isLoggedIn = false;
-  message: string;
+  message: string = "";
  
-  constructor(private _dataService:DataService, 
-              private _authService:AuthService,
-              private modalService: NgbModal,
+  constructor(private modalService: NgbModal,
               private renderer: Renderer2) { }
 
   ngOnInit() {
-    this.isLoggedIn = this._authService.isAuthenticated();
-    //TODO to use roles for loggedin call this instead 
-    //this.checkAuth();
-    
-    //Create space for a login person
-    this.loginPerson = new Person();
    }
 
   
@@ -43,50 +31,16 @@ export class HeaderComponent implements OnInit {
   }
 
   
-  checkAuth() {
-
-    this._dataService.loggeduser()
-    .subscribe(res => {
-      console.log("back from api test");
-      console.log("test Token =",res);
-      this.message = "User:" + res.username + " Role:" + res.claims[0];
-    },
-    err => {
-      console.log("Error from test", err)
-      if (err.status===403)
-        this.message = "Test Access: " + err.statusText;
-    });
-  }
   Logout() {
-    this._authService.removeToken();
-    this.message = "";
- 
   }
 
   Login() {
-    console.log("Login(person)=",this.loginPerson);
-    //this.setActive('login');
-    this._dataService.login(this.loginPerson)
-    .subscribe(res => {
-      console.log("back from user");
-      console.log("Login Token =",res);
-      this._authService.setAuthToken(res.token);
-      this.message = "";
-      //this.closeResult ="Login Access: Granted!";
-      alert("Login Access: Granted!");
-      //window.location.reload();
-    },
-    err => {
-      console.log("Error from Login", err)
-      if (err.status===403)
-        this.message = "Login Failed! Access: " + err.statusText;
-        //this.closeResult ="";
-    });
   }
 
-  openLogin(content) {
+  checkAuth() {}
+  openLogin(content:any) {
 
-    window.location.href="http://localhost:4000/api/login?ssoReturn=http://sss2:3000/sso/";
+    window.location.href="http://localhost:3000/api/login?ssoReturn=http://sss2:3000/sso/";
 
     return;
 /*

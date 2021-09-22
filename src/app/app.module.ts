@@ -2,19 +2,21 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
+											 
 import { RouterModule, Routes } from '@angular/router';
-//import { HttpModule } from '@angular/http';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+
 
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 //import {CalendarComponent} from "ap-angular2-fullcalendar/src/calendar/calendar";
-import { CalendarModule } from 'angular-calendar';
+import { CalendarModule, DateAdapter } from 'angular-calendar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 
 import { DataService } from './data.service';
 import { AuthService } from './auth.service'
 import { AppComponent } from './app.component';
+import { AppRoutingModule } from './app-routing.module';
 import { PostsComponent } from './posts/posts.component';
 import { HeaderComponent } from './header/header.component';
 import { PersonsearchComponent } from './personsearch/personsearch.component';
@@ -29,6 +31,13 @@ import { PictureComponent } from './picture/picture.component';
 import { Windowref } from './windowref.service';
 import { AuthInterceptor } from './auth-interceptor';
 import { SsoComponent } from './sso/sso.component';
+import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
+//import { adapterFactory } from 'angular-calendar/date-adapters/moment';
+//import * as moment from 'moment';
+
+//export function momentAdapterFactory() {
+//  return adapterFactory(moment);
+//};
 
 const ROUTES : Routes = [
   {
@@ -91,11 +100,11 @@ const ROUTES : Routes = [
     BrowserModule,
     CommonModule,
     BrowserAnimationsModule,
-    NgbModule.forRoot(),
+    NgbModule,
     //HttpModule,
     HttpClientModule,
     RouterModule.forRoot(ROUTES),
-    CalendarModule.forRoot(),
+    CalendarModule.forRoot({ provide: DateAdapter, useFactory: adapterFactory }),
     FormsModule
   ],
   providers: [DataService, AuthService, Windowref

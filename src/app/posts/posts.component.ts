@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from '../data.service';
+import { Person } from '../Model/Person';
 
 @Component({
   selector: 'app-posts',
@@ -8,7 +9,7 @@ import { DataService } from '../data.service';
 })
 export class PostsComponent implements OnInit {
   // instantiate posts to an empty object
-  posts: any = [];
+  posts : Person[] = []
 
   constructor(private _dataService:DataService) { }
 

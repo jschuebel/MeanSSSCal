@@ -1,15 +1,16 @@
-import { Component, OnInit,ElementRef, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, HostListener, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { DataService } from '../data.service';
 import { Windowref } from '../windowref.service';
 import  * as _ from 'lodash';
 
 @Component({
   selector: 'app-picture',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './picture.component.html',
   styleUrls: ['./picture.component.css']
 })
-export class PictureComponent implements OnInit {
-  @ViewChild('tFolder') tFolderRef: ElementRef;
+export class PictureComponent implements AfterViewInit  {
+  @ViewChild('tFolder', { static: true }) tFolderRef: ElementRef;
   @ViewChild('videoPlayer') videoplayer: any;
   
   hasDirectories: boolean;
@@ -18,11 +19,11 @@ export class PictureComponent implements OnInit {
   SSSPicDate: Date;
   MaxCols:number;
   tabData:JSON;
-  hlddir = [];
-  currDirs = [];
-  folders = [];
-  pictures = [];
-  movies = [];
+  hlddir : any[] = [];
+  currDirs : any[] = [];
+  folders : any[] = [];
+  pictures : any [] = [];
+  movies : any[] = [];
   MoviePath:string;
   tFolder:any;
   dataService:DataService;
@@ -32,10 +33,16 @@ export class PictureComponent implements OnInit {
   BackButtonDisabled:boolean = true;
 
   @HostListener('window:resize', ['$event'])
-  onResize(event) {
+  onResize(event:any) {
     //console.log("onResize event.target.innerWidth", event.target.innerWidth);
     //this.MaxCols = Math.floor(event.target.innerWidth/180);
+    if (this.tFolder.offsetWidth===0 && window.innerWidth === 0) {
+      console.log('Error screen not reporting widths');
+      return;
+    }
     this.MaxCols = Math.floor(this.tFolder.offsetWidth/180);
+    if (this.MaxCols===0)
+      this.MaxCols = Math.floor(window.innerWidth/180);  
 
     this.MoviePath="";
     this.folders=[];
@@ -45,7 +52,7 @@ export class PictureComponent implements OnInit {
     this.updateTable(currentNode);
  }
 
-  constructor(private _dataService:DataService, _windRef:Windowref) { 
+  constructor(private _dataService:DataService, _windRef:Windowref,private ref: ChangeDetectorRef) { 
     this.dataService=_dataService;
     this.nativeWindow=_windRef.getNativeWindow();
     
@@ -65,10 +72,29 @@ export class PictureComponent implements OnInit {
     }
   }
 
-  ngOnInit() {
-    this.tFolder = this.tFolderRef.nativeElement;
-    this.MaxCols = Math.floor(this.tFolder.offsetWidth/180);
+  ngAfterViewInit() {
 
+}
+  
+ngOnInit() {
+  console.log('started');
+
+//    this.tFolderRef.changes.subscribe((comps: QueryList <GridComponent>) =>
+//    {
+//        this.SearchGrid = comps.first;
+//    });
+
+   
+    this.tFolder = this.tFolderRef.nativeElement;
+    if (this.tFolder.offsetWidth===0 && window.innerWidth===0) {
+      console.log('Error screen not reporting widths');
+      return;
+    }
+
+    
+    this.MaxCols = Math.floor(this.tFolder.offsetWidth/180);  
+    if (this.MaxCols===0)
+      this.MaxCols = Math.floor(window.innerWidth/180);  
     console.log("updateTable this.tFolder.offsetWidth", this.tFolder.offsetWidth);
     console.log("updateTable ngOnInit", this.MaxCols);
     this.initLoad(this.dataService);
@@ -79,9 +105,9 @@ export class PictureComponent implements OnInit {
     // Retrieve
     let data = localStorage.getItem("SSSPics");
     //console.log("initLoad data", data);
-    console.log("initLoad data type", typeof(data));
+    //console.log("initLoad data type", typeof(data));
     if (data==null || data=="undefined") {
-      console.log("initLoad getPictures");
+      //console.log("initLoad getPictures");
       this._dataService.getPictures()
       .subscribe(res => {
         //console.log("getPictures res=",res);
@@ -97,14 +123,14 @@ export class PictureComponent implements OnInit {
 
     }
     else {
-      console.log("initLoad parse");
+      //console.log("initLoad parse");
       this.tabData = JSON.parse(data);
       this.hlddir.push(this.tabData);
       this.updateTable(this.tabData);
     }
   }
 
-  updateTable(newNode) {
+  updateTable(newNode:any) {
 
     console.log("updateTable newNode",newNode);
     let keys = Object.keys(newNode.folders);
@@ -124,7 +150,10 @@ export class PictureComponent implements OnInit {
     console.log("updateTable keys",keys);
     console.log("updateTable tmpFolders len", tmpFolders.length);
     console.log("updateTable MaxCols", this.MaxCols);
-    
+    if (this.MaxCols==0) {
+      console.log("!!!!!!!!! ERRROR divide by Zero !!!!!!!!");
+      return;
+    }
     let MaxRows = Math.floor(tmpFolders.length/this.MaxCols);
     console.log("updateTable MaxRows", MaxRows);
     if ((tmpFolders.length % this.MaxCols) > 0) MaxRows++;
@@ -169,14 +198,14 @@ export class PictureComponent implements OnInit {
     this.hasMovies = this.movies.length>0;
     console.log("updateTable this.movies len", this.movies.length);
 
-    
+   // this.ref.detectChanges(); 
   }
 
-  FullPic(selpath){
+  FullPic(selpath:any){
     console.log("FullPic path", selpath);
     var selFile = '';
     //d:/inetpub/family/aquarium2008/img_0096.jpg"
-    let SelectedPics = _.reduce(this.pictures, function(memo, val, idx) {
+    let SelectedPics = _.reduce(this.pictures, function(memo:any, val:any, idx:any) {
       console.log("SEL val.Path", val.Path);
       let lastslash = val.Path.lastIndexOf('/');
       if (lastslash!=-1) lastslash++;
@@ -201,7 +230,7 @@ export class PictureComponent implements OnInit {
     nwin.opener.pth2 = "http://www.schuebelsoftware.com/SSSWebAPI/api/Image?Height=&Width=&FilePath=" + selpath;
   }
 
-  ChangeMovie(path){
+  ChangeMovie(path:string){
     console.log("ChangeMovie path", path);
     const regp = /[cdefg]:\/inetpub\//
     let hldpath = path.replace(regp, "http://www.schuebelsoftware.com/"); 
@@ -233,7 +262,7 @@ export class PictureComponent implements OnInit {
 
   }
 
-  Loadit(newName){
+  Loadit(newName : string){
     console.log("vbLoadit newName", newName);
     this.MoviePath="";
     this.folders=[];

@@ -1,10 +1,10 @@
 # Mean Stack Example
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.4.4.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.2.5.
 
 ## Updates 
 
-- Moved to Angular to 5.2
+- Moved to Angular to 12.2
 - Added Lodash
 - Added Json Web Token security(SSO) (1/2020)
 - Added swipe to popup picture (1/2020)

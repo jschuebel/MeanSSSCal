@@ -7,15 +7,17 @@ import {
 } from '@angular/common/http';
 */
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/toPromise';
+//import 'rxjs/add/operator/map';
+import {map} from 'rxjs/operators'
 import { MyEvent, colors } from './Model/MyEvent';
 import { Address } from './Model/Address';
-import { Event } from './Model/Event';
+import { SSSEvent } from './Model/SSSEvent';
 import { Person } from './Model/Person';
 //import { userInfo } from 'os';
+
+export type Nullable<T> = T | null;
 
 @Injectable()
 export class DataService {
@@ -60,8 +62,8 @@ export class DataService {
      }
 
   
-  saveEmails(event : Event ) : any {
-    return this._http.post("/api/eventemail",{ id:event._id, Emails: event.Emails});
+  saveEmails(event : SSSEvent ) {
+    return this._http.post<any>("/api/eventemail",{ id:event._id, Emails: event.Emails});
     //.map(result=>this.result=result.json().data);
   }
 
@@ -75,7 +77,7 @@ export class DataService {
     return this._http.get<Array<Person>>("/api/users");
   }
 
-  saveEvent(event : Event ) {
+  saveEvent(event : SSSEvent ) {
     //deep clone and remove the extra information
     var hldevent = JSON.parse(JSON.stringify(event));
     delete hldevent.eventperson;
@@ -83,7 +85,7 @@ export class DataService {
 //      .map(result=>this.result=result.json().data);
 }
 
-  getEvents(UserID:number, fromDate: string, toDate: string, cat: string, descrip : string) {
+  getEvents(UserID:Nullable<number>, fromDate: Nullable<string>, toDate: Nullable<string>, cat: Nullable<string>, descrip : Nullable<string>) {
     //Restful : "/api/events/"+ UserID
     console.log("getEvents  UserId=", UserID, "  fromDate=", fromDate, "  toDate=", toDate, "  cat=", cat, "  descrip=", descrip);
     var rout="/api/events";
@@ -113,7 +115,7 @@ export class DataService {
 
     console.log("getEvents rout=", rout,);
       
-      return this._http.get<Array<Event>>(rout);
+      return this._http.get<Array<SSSEvent>>(rout);
   }
 
   
@@ -130,9 +132,9 @@ export class DataService {
     return this._http.get<any>("/api/categories");//.map(result=>this.result=result.json().data);
   }
 
-  getCalendarEvents(start:Date, end:Date) {
+  getCalendarEvents(start:Date, end:Date):Observable<any> {
     console.log("getCalendarEvents start=", start, ' end=', end);
-    return this._http.get<Array<any>>("/api/GetCalendarEvents?&start="+start+"&end="+end).toPromise();
+    return this._http.get<Array<any>>("/api/GetCalendarEvents?&start="+start+"&end="+end);
     
     /*
     return this._http2.get("/api/GetCalendarEvents?&start="+start+"&end="+end)
@@ -144,8 +146,7 @@ export class DataService {
         element.start.setFullYear(start.getFullYear()); 
             }) 
             return items; 
-          })
-      .toPromise();
+          });
       */
     }
 

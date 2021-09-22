@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { DataService } from '../data.service';
+import { DataService, Nullable } from '../data.service';
 import { AuthService } from '../auth.service'
 import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 import { Address } from '../Model/Address';
 import { Person } from '../Model/Person';
-import { Event } from '../Model/Event';
+import { SSSEvent } from '../Model/SSSEvent';
 import  * as _ from 'lodash';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -53,14 +53,24 @@ export class PersonsearchComponent implements OnInit {
  
     this._dataService.getUsers()
     .subscribe(res => {
-      this.MasterPeopleDataList = res;
+
+      this.MasterPeopleDataList = <Person[]> _.map(res, function(val:Person) {
+        if (val.events[0]==null) {
+          return val;
+        }
+        let dt = new Date(val.events[0].Date);
+        //console.log(new Date(dt.getTime() + (dt.getTimezoneOffset() * 60000)));
+        val.events[0].Date=new Date(dt.getTime() + (dt.getTimezoneOffset() * 60000));
+        return val;
+      });
+    
       console.log("peoplelist=",this.MasterPeopleDataList);
       this.numberOfPages = Math.round(this.MasterPeopleDataList.length / this.pageSize);
       this.PeopleDataList=this.MasterPeopleDataList;
       this.setPage();
     });
 
-    let storedList:string = localStorage.getItem("AddressList");
+    let storedList:Nullable<string> = localStorage.getItem("AddressList");
     if (storedList==null) {
       this._dataService.getAddresses()
       .subscribe(res => {
@@ -75,7 +85,7 @@ export class PersonsearchComponent implements OnInit {
     }
   }
 
-  CreateNew(content) {
+  CreateNew(content:any) {
     let p = new Person();
 
     open(content, JSON.stringify(p));
@@ -96,19 +106,19 @@ export class PersonsearchComponent implements OnInit {
     console.log("this.pagedItems=",this.pagedItems);
   }
 
-  onChange(Address) {
+  onChange(Address:Address) {
     console.log("onchange Address=",Address);
     console.log("onchange this.selectedAddress=",this.selectedAddress);
     this.selectedPerson.AddressID=this.selectedAddress._id;
     
   }
 
-filter(data){
+filter(data:any){
   let col="Name";
   console.log("filter event=",data);
   
   this.PeopleDataList=this.MasterPeopleDataList;
-  this.PeopleDataList = <Person[]> _.reduce(this.PeopleDataList, function(memo, val, idx) {
+  this.PeopleDataList = <Person[]> _.reduce(this.PeopleDataList, function(memo:any, val:any, idx:any) {
     let bracketPos=data.col.indexOf("[");
 
     if (val!=null && val[data.col]!=null) {
@@ -168,25 +178,26 @@ filter(data){
   this.setPage();
 }
 
- sort(data) {
+ sort(data:any) {
   console.log("sort event=",data);
   this.sortColumn = data.col;
   let sasc = 'asc';
   if (data.desc)
     sasc = 'desc';
 
-  this.PeopleDataList = _.orderBy(this.PeopleDataList, [this.sortColumn],[sasc]); // Use Lodash to sort array by 'name'
+  this.PeopleDataList = _.orderBy(this.PeopleDataList, [this.sortColumn],[!data.desc]); // Use Lodash to sort array by 'name'
   this.setPage();
 }
 
- toJSONLocal (date) {
-	  var local = new Date(date);
+ toJSONLocal (date:Date) {
+	  var locl = new Date(date);
     //local.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-    return local.toJSON().slice(0, 10);
+    console.log("toJSONLocal local.toUTCString()=",locl.toJSON());
+    return locl.toJSON().slice(0, 10);
   }
   
 //https://ng-bootstrap.github.io/#/components/modal/examples
-  openPerson(content, person) {
+  openPerson(content:any, person:Nullable<Person>) {
     console.log("open(person)=",person);
     if (person==null) {
       person = new Person();
@@ -196,19 +207,22 @@ filter(data){
 	}
 	else
 	{
-    if (person.events[0]!=null && person.events[0].Date!=null)
-      person.events[0].Date = this.toJSONLocal(person.events[0].Date);
-    else person.events[0] = new Event();
+    if (person.events[0]!=null){
+      if (person.events[0].Date!=null) {
+        person.events[0].displayDate=this.toJSONLocal(person.events[0].Date);
+      }
+    }
+    else person.events[0] = new SSSEvent();
 
 		this.message = "here is the select id = " + person._id;
     this.selectedPerson=person;
     
-		if (this.selectedPerson["Address ID"]==null)
+		if (this.selectedPerson.AddressID==null)
 			this.selectedAddress = new Address();
 		else {
-			console.log("this.selectedPerson.AddressID=",this.selectedPerson["Address ID"]);
+			console.log("this.selectedPerson.AddressID=",this.selectedPerson.AddressID);
 			//this.selectedAddress = _.find(this.AddressList, {id :this.selectedPerson["Address ID"]});
-      this.selectedAddress = <Address> _.find(this.AddressList, { _id :this.selectedPerson["Address ID"]});
+      this.selectedAddress = <Address> _.find(this.AddressList, { _id :this.selectedPerson.AddressID});
 		}
 
 		console.log("open(selectedAddress)=",this.selectedAddress);

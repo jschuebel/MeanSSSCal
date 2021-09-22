@@ -2,28 +2,35 @@
 <h2 id="h2Title">SSS - Pictures</h2>
 <hr />   
 
-<input type=button [disabled]="BackButtonDisabled" value={{BackButtonValue}} id="btnBack" (click)="BackLoadit();" />
-<div [ngClass]="{'divgroup_hide_div': !hasDirectories, 'divgroup': hasDirectories}" >
-  <div class="container">
+<div class="container-fluid">
   <div class="row">
-  <div  class="col-md-2 col-md-offset-5" id='picCont'>
-    <h2>Directories</h2>
+    <div class="col-sm-4 col-md-4 col-lg-2  offset-sm-3 offset-md-3 offset-lg-5" id='picCont'>
+      <input type=button [disabled]="BackButtonDisabled" value={{BackButtonValue}} id="btnBack" (click)="BackLoadit();" />
+    </div>
+  </div>
 </div>
-</div>
-</div>
-  <table #tFolder width="100%" cellspacing="0" border="0">
+
+
+<div [ngClass]="{'divgroup_hide_div': !hasDirectories, 'divgroup': hasDirectories}" >
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-4 col-md-4 col-lg-2  offset-sm-3 offset-md-3 offset-lg-5" id='picCont'>
+        <h2>Directories</h2>
+      </div>
+    </div>
+  </div>
+      <table #tFolder cellspacing="0" border="0">
     <tr>
         <td>
             <div *ngFor="let cell of folders;" style="float:left;min-width: 180px;"><div *ngIf="cell.Name==''">&nbsp;</div><a *ngIf="cell.Name!=''"  href="javascript:void(0)" (click)="Loadit(cell.Name)">{{cell.Name}}</a></div>
         </td>
     </tr>
   </table>
-</div>  
-
+</div>
 
 <div [ngClass]="{'divgroup_hide_div': !hasPictures, 'divgroup': hasPictures}" >
   <h2>Pictures</h2>
-  <table id="tPics" name="tPics" width="100%" cellspacing="0" border="0">
+  <table id="tPics" name="tPics" width="100%" cellspacing="0" border="1">
       <tr>
           <td>
             <div *ngFor="let cell of pictures;" style="float:left;min-width: 190px;min-height: 190px;"><a href="javascript:void(0)" (click)="FullPic(cell.Path)"><img id="imgPic" alt="{{cell.Name}}" style="background: url(&quot;../Images/350.gif&quot;) no-repeat center;" src='http://www.schuebelsoftware.com/SSSWebAPI/api/Image?Height=180&Width=180&FilePath={{cell.Path}}'></a></div>

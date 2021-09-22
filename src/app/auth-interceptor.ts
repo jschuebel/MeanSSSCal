@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   HttpEvent, HttpInterceptor, HttpHandler, HttpRequest
 } from '@angular/common/http';
+import { Nullable} from './data.service';
 import { AuthService } from './auth.service'
 
 @Injectable()
@@ -13,7 +14,7 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     // Get the auth token from the service.
     //const authToken = this.auth.getAuthorizationToken();
-    let currTokenVal:string = this._authService.getToken();
+    let currTokenVal:Nullable<string> = this._authService.getToken();
     console.log("interceptor _authService.getToken currTokenVal", currTokenVal)
     if (currTokenVal!==null) {
     const  authToken:string = 'Bearer ' + currTokenVal;
