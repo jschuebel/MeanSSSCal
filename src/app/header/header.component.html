@@ -11,9 +11,9 @@
             <li class="nav-item"><a (click)="setActive('person')" class="{{getActive('person')}}" routerLink="/person">Edit People</a></li>
             <li class="nav-item"><a (click)="setActive('event')" class="{{getActive('event')}}" routerLink="/event">Edit Events</a></li>
             <li class="nav-item"><a (click)="setActive('email')" class="{{getActive('email')}}" routerLink="/email">Edit Email</a></li>
-            <li class="nav-item"><a (click)="openLogin(LoginPop);$event.stopPropagation();" class="{{getActive('login')}}"  href="javascript:void(0);"  >Login</a></li>
-            <li class="nav-item"><a (click)="Logout();$event.stopPropagation();" class="{{getActive('logout')}}" [routerLink]="">LogOut</a></li>
-            <li class="nav-item"><a (click)="checkAuth();$event.stopPropagation();" class="{{getActive('test')}}" [routerLink]="">Test</a></li>
+            <li class="nav-item"><a (click)="openLogin(LoginPop, $event);$event.stopPropagation();" class="{{getActive('login')}}"  href="javascript:void(0);"  >Login</a></li>
+            <li class="nav-item"><a (click)="Logout($event);$event.stopPropagation();" class="{{getActive('logout')}}" [routerLink]="">LogOut</a></li>
+            <li class="nav-item"><a (click)="checkAuth($event);$event.stopPropagation();" class="{{getActive('test')}}" [routerLink]="">Test</a></li>
             </ul>
         </div>
         <div class="row">

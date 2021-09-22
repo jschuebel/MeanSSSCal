@@ -1,5 +1,6 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+const session = require('express-session');
+//const bodyParser = require('body-parser');
 const path = require('path');
 const http = require('http');
 const app = express();
@@ -20,12 +21,14 @@ app.use(function (req,res,next) {
 // API file for interacting with MongoDB
 const api = require('./server/routes/api');
 
+app.use(session({secret: 'mytestsessionsecrethere',saveUninitialized: true,resave: true}));
+
 // Parsers
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true}));
 
 // Angular DIST output folder
-app.use(express.static(path.join(__dirname, 'dist/testlatestang')));
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // API location
 app.use('/api', api);
@@ -33,7 +36,7 @@ app.use('/api', api);
 
 // Send all other requests to the Angular app
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist/testlatestang/index.html'));
+    res.sendFile(path.join(__dirname, 'dist/index.html'));
 });
 
 //Set Port

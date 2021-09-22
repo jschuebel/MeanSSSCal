@@ -1,5 +1,8 @@
 import { Component, OnInit, Renderer2 } from '@angular/core';
 import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
+import { Person } from '../Model/Person';
+import { DataService } from '../data.service';
+import { AuthService } from '../auth.service'
 
 @Component({
   selector: 'app-header',
@@ -8,13 +11,19 @@ import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 })
 export class HeaderComponent implements OnInit {
   currentChoice: string = "home";
+  loginPerson: Person;
   isLoggedIn = false;
   message: string = "";
- 
+  showModal : boolean;
+
   constructor(private modalService: NgbModal,
-              private renderer: Renderer2) { }
+              private renderer: Renderer2,
+              private _dataService:DataService, 
+              private _authService:AuthService) { }
 
   ngOnInit() {
+    this.isLoggedIn = this._authService.isAuthenticated();
+    this.loginPerson = new Person();
    }
 
   
@@ -30,17 +39,20 @@ export class HeaderComponent implements OnInit {
 
   }
 
-  
-  Logout() {
+  hide()
+  {
+    this.showModal = false;
   }
 
-  Login() {
-  }
+  openLogin(loginpop:any, event:any) {
 
-  checkAuth() {}
-  openLogin(content:any) {
-
-    window.location.href="http://localhost:3000/api/login?ssoReturn=http://sss2:3000/sso/";
+    console.log("OPENLOGIN redirecting to SSO");
+    console.log("OPENLOGIN event", event);
+    event.preventDefault();
+    event.stopPropagation();
+    window.location.href ="/api/login?ssoReturn=http://localhost:3000/sso/";
+//    window.location.href = "http://sso.schuebelsoftware.com/api/login?ssoReturn=https://localhost:44330/sso/";
+//    window.location.href = "http://sso.schuebelsoftware.com/api/login?ssoReturn=https://192.168.50.99:44330/sso/";
 
     return;
 /*
@@ -61,6 +73,68 @@ export class HeaderComponent implements OnInit {
       //this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
     });
 */    
+  }
+
+  Logout(event:any) {
+
+    this._dataService.logout()
+      .subscribe(res => {
+        console.log("back from api test");
+        console.log("test Token =", res);
+        this.message = "back from server logout";
+        //currently no claims added==>this.message = "User:" + res.username + " Role:" + res.claims[0].value;
+      },
+        err => {
+          console.log("Error from test", err)
+          if (err.status === 403 || err.status === 401)
+            this.message = "Test Access: " + err.statusText;
+        });
+
+    this._authService.removeToken();
+    this.message = "";
+    event.preventDefault();
+    event.stopPropagation();
+   }
+
+  Login() {
+    this.showModal = false;
+    console.log("Login(person)=",this.loginPerson);
+    this._dataService.login(this.loginPerson)
+    .subscribe(res => {
+      console.log("back from user");
+      console.log("Login Token =",res);
+      this._authService.setAuthToken(res.access_token);
+      this.message = "";
+      //this.closeResult ="Login Access: Granted!";
+      alert("Login Access: Granted!");
+      //window.location.reload();
+    },
+    err => {
+      console.log("Error from Login", err)
+      if (err.status===403)
+        this.message = "Login Failed! Access: " + err.statusText;
+        //this.closeResult ="";
+    });
+  }
+
+  checkAuth(event:any) {
+    console.log("checkAuth called");
+    this._dataService.loggeduser()
+    .subscribe(res => {
+      console.log("back from api test");
+      console.log("test Token =", res);
+      this.message = "back from server loggeduser";
+      //this.message = "User:" + res.username + " Role:" + res.claims[0].value;
+    },
+    err => {
+      console.log("Error from test", err)
+      if (err.status===403 || err.status===401)
+        this.message = "Test Access: " + err.statusText;
+    });
+
+    event.preventDefault();
+    event.stopPropagation();
+
   }
 
   private getDismissReason(reason: any): string {

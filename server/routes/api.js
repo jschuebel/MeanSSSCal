@@ -5,6 +5,7 @@ const ObjectID = require('mongodb').ObjectID;
 const db = require('./db1');
 const lodash = require('lodash');    
 const jwt = require('jsonwebtoken');
+const path = require('path');
 
 // Connect
 const CreateConnection = (closure) => {
@@ -72,7 +73,7 @@ function updateUser(db, user) {
 
   router.get('/login', (req, res) => {
 
-    console.log("req.body",req.body);    //body to json from a post
+    console.log("login req.body",req.body);    //body to json from a post
     console.log("req.query", req.query);
     console.log("req.query ssoReturn", req.query.ssoReturn);
     let sess=req.session;
@@ -82,6 +83,7 @@ function updateUser(db, user) {
     console.log("req.sessionID", req.sessionID);
     console.log("req.headers.referer", req.headers.referer);
 
+    console.log("login __dirname", __dirname);
   res.sendFile(path.join(__dirname, '../../dist/login.html'));
 
 });

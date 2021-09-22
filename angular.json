@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "testlatestang": {
+    "mean": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:application": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/testlatestang",
+            "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -26,6 +26,7 @@
               "src/favicon.ico",
               "src/assets",
               "src/inetpub.json",
+              "src/login.html",
               "src/PicsPage.html"
             ],
             "styles": [
@@ -73,10 +74,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "testlatestang:build:production"
+              "browserTarget": "mean:build:production"
             },
             "development": {
-              "browserTarget": "testlatestang:build:development"
+              "browserTarget": "mean:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -84,7 +85,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "testlatestang:build"
+            "browserTarget": "mean:build"
           }
         },
         "test": {
@@ -103,6 +104,7 @@
             ],
             "styles": [
               "node_modules/angular-calendar/css/angular-calendar.css",
+              "src/bootstrap.css",
               "src/styles.css"
             ],
             "scripts": []
@@ -111,5 +113,5 @@
       }
     }
   },
-  "defaultProject": "testlatestang"
+  "defaultProject": "mean"
 }

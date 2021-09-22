@@ -32,6 +32,7 @@ export class DataService {
      //.map(result=>this.result=result.json().data);
   }
 
+  
   //https://blog.angularindepth.com/the-new-angular-httpclient-api-9e5c85fe3361
   //https://angular.io/guide/http  
   loggeduser() {
@@ -61,7 +62,23 @@ export class DataService {
     */
      }
 
+     getRefreshToken(tok:Nullable<string>) {
+
+      const httpOptions = {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + tok
+        })
+      };
+      return this._http.post<any>("/api/refreshtoken", {}, httpOptions);
+//      return this._http.post<any>("http://sso.schuebelsoftware.com/api/refreshtoken", {}, httpOptions);
+    }
   
+    logout() {
+      return this._http.post<any>(`/api/logout`, {});
+//      return this._http.post<any>(`http://sso.schuebelsoftware.com/api/logout`, {});
+      
+    }
   saveEmails(event : SSSEvent ) {
     return this._http.post<any>("/api/eventemail",{ id:event._id, Emails: event.Emails});
     //.map(result=>this.result=result.json().data);
